@@ -1,13 +1,11 @@
-import React from "react";
-import Navbar from "./navbar/navbar";
-const page = () => {
-  return (
-    <>
-      <div>
-        <Navbar></Navbar>
-      </div>
-    </>
-  );
-};
+import React from "react"; 
+import Patient from "./page/stat/patient/page";
 
-export default page;
+
+export default function Home() {
+  return (
+      <div>
+        <Patient />
+      </div>
+  )
+}
