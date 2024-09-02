@@ -12,10 +12,12 @@ export default function navbar() {
   return (
     <div className="bg-slate-50">
       <div className="w-[80px] h-[100vh] bg-white drop-shadow-md rounded">
+      <Link href="/page/accueil/">
         <img src="/Images/laboratoryy_32.png" className="pl-5 pt-4" />
         <p className="text-[12px] pl-[6px] pt-2 font-bold text-green-900">
           Laboratoire
         </p>
+        </Link>
         <hr className="w-14 ml-[10px] mt-2" />
 
         <div className="text-center mt-6">
