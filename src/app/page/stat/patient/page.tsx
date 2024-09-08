@@ -146,8 +146,10 @@ export default function Patient() {
 
   // CALCUL DU NOMBRE DE PATIENT HOSPITALISE 
   const totalPatientH = hospitaliseData.length;
+  // NOMBRE DE PATIENT PAR SEXE
   const Homme = hospitaliseData.filter(hospitalise => hospitalise.sexe === 'M').length;
   const Femme = hospitaliseData.filter(hospitalise => hospitalise.sexe === 'F').length;
+  // NOMBRE DE PATIENT PAR SERVICE
   const Orthopedie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Orthopédie').length;
   const Chirurgie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Chirurgie').length;
   const Bloc = hospitaliseData.filter(hospitalise => hospitalise.service === 'Bloc').length;
@@ -166,6 +168,45 @@ export default function Patient() {
   const Triage = hospitaliseData.filter(hospitalise => hospitalise.service === 'Triage').length;
   const Imagérie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Imagerie').length;
   const CRTS = hospitaliseData.filter(hospitalise => hospitalise.service === 'CRTS').length;
+  // NOMBRE DE PATIENT PAR GÉNÉRATION
+  // Fonction pour obtenir le nombre de patients par tranche d'âge
+// Fonction pour convertir les âges en nombres
+const parseAge = (age: string): number => {
+  const range = age.split('-');
+  if (range.length === 2) {
+    return (parseInt(range[0]) + parseInt(range[1])) / 2;
+  }
+  return parseInt(age);
+};
+  
+  const getPatientCountsByAge = (data: HospitaliseData[]) => {
+    const ageGroups = {
+      Enfant: 0,
+      Jeune: 0,
+      Adulte: 0,
+      Vieux: 0,
+    };
+  
+    data.forEach((patient) => {
+      const age = typeof patient.age === 'number' ? patient.age : parseAge(patient.age);
+  
+      if (age >= 0 && age <= 12) {
+        ageGroups.Enfant += 1;
+      } else if (age >= 13 && age <= 24) {
+        ageGroups.Jeune += 1;
+      } else if (age >= 25 && age <= 64) {
+        ageGroups.Adulte += 1;
+      } else if (age >= 65) {
+        ageGroups.Vieux += 1;
+      }
+    });
+  
+    return ageGroups;
+  };
+
+  const { Enfant, Jeune, Adulte, Vieux } = getPatientCountsByAge(hospitaliseData);
+  
+
 
 
   const data: ServiceData[] = [
@@ -332,19 +373,19 @@ const areaOptions = {
         <tbody>
           <tr className="flex justify-between">
             <td>Enfants (-12ans):</td>
-            <td className="font-bold">20</td>
+            <td className="font-bold">{Enfant}</td>
           </tr>
           <tr className="flex justify-between">
             <td>Jeunes (13 - 24ans):</td>
-            <td className="font-bold">40</td>
+            <td className="font-bold">{Jeune}</td>
           </tr>
           <tr className="flex justify-between">
             <td>Adultes (25 - 64ans):</td>
-            <td className="font-bold">30</td>
+            <td className="font-bold">{Adulte}</td>
           </tr>
           <tr className="flex justify-between">
             <td>Vieux (+65ans):</td>
-            <td className="font-bold">10</td>
+            <td className="font-bold">{Vieux}</td>
           </tr>
         </tbody>
       </table>
@@ -404,36 +445,36 @@ const areaOptions = {
     <h2 className="text-center font-extrabold text-gray-800 text-[26px]">Nombre de patient par service</h2>
   </div>
 
-  {/* Liste des services */}
+  {/* NOMBRE DE PATIENT POUR CHAQUE POLE  */}
   <div className="grid grid-cols-2 gap-6 text-gray-800 font-medium text-[15px]">
     <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
       <FaHeartbeat className="text-red-500" />
-      <p className="hover:text-blue-600">POLE CHIRURGIE</p>
+      <p className="hover:text-blue-600">POLE CHIRURGIE : </p>
     </div>
     
     <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
       <FaBrain className="text-purple-500" />
-      <p className="hover:text-blue-600">POLE TÊTE ET COU</p>
+      <p className="hover:text-blue-600">POLE TÊTE ET COU :</p>
     </div>
     
     <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
       <FaStethoscope className="text-green-500" />
-      <p className="hover:text-blue-600">POLE MEDECINE</p>
+      <p className="hover:text-blue-600">POLE MEDECINE :</p>
     </div>
     
     <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
       <FaBaby className="text-pink-500" />
-      <p className="hover:text-blue-600">POLE MÈRE ENFANT</p>
+      <p className="hover:text-blue-600">POLE MÈRE ENFANT :</p>
     </div>
     
     <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
       <GiScalpel className="text-blue-700" />
-      <p className="hover:text-blue-600">POLE ANESTHÉSIE RÉANIMATION URGENCE</p>
+      <p className="hover:text-blue-600">POLE ANESTHÉSIE RÉANIMATION URGENCE :</p>
     </div>
     
     <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
       <FaMicroscope className="text-yellow-500" />
-      <p className="hover:text-blue-600">POLE PARACLINIQUE</p>
+      <p className="hover:text-blue-600">POLE PARACLINIQUE :</p>
     </div>
   </div>
   {/* Bouton Voir Détails */}

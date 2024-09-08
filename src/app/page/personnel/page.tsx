@@ -233,7 +233,7 @@ export default function Personnel() {
       console.error("Erreur lors de l'ajout du personnel :", error);
     }
   };
-  
+  // Ajout de notification
   const handleAddSubmit1 = async () => {
     try {
       const response1 = await fetch('http://localhost:3001/notifs', {
