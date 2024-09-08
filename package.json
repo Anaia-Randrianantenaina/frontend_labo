@@ -13,12 +13,15 @@
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^5.16.7",
     "@mui/x-data-grid": "^7.14.0",
+    "@mui/x-date-pickers": "^7.15.0",
     "antd": "^5.20.3",
     "axios": "^1.7.5",
     "chart.js": "^4.4.4",
+    "dayjs": "^1.11.13",
     "install": "^0.13.0",
     "next": "14.2.5",
     "npm": "^10.8.2",
+    "qrcode.react": "^4.0.1",
     "react": "^18",
     "react-chartjs-2": "^5.2.0",
     "react-data-table-component": "^7.6.2",
@@ -30,6 +33,7 @@
     "recharts": "^2.12.7",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "sweetalert2": "^11.13.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

@@ -9,6 +9,8 @@ import * as XLSX from 'xlsx';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"
 
+
+
 // Composant principal pour afficher et gérer les personnels
 export default function Personnel() {
 
@@ -34,8 +36,13 @@ export default function Personnel() {
     contacte: string;
   }
 
+  interface NotifData {
+    message: string ;
+  }
+
   // États pour stocker les données, les états de chargement, et la visibilité des modaux
   const [data, setData] = useState<PersonnelData[]>([]);
+  const [dataN, setDataN] = useState<NotifData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -179,6 +186,11 @@ export default function Personnel() {
     contacte: ''
   });
 
+  // Etat pour stocker les valeurs du formulaire 
+  const [formValues1, setFormValues1] = useState({
+    message: 'Un nouveau personnel ajouté',
+  });
+
   // Fonction pour gérer les changements dans les champs du formulaire
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -188,9 +200,7 @@ export default function Personnel() {
     });
   };
 
-  // Fonction pour soumettre le formulaire d'ajout
-  const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleAddSubmit = async () => {
     try {
       const response = await fetch('http://localhost:3001/personnels', {
         method: 'POST',
@@ -199,16 +209,16 @@ export default function Personnel() {
         },
         body: JSON.stringify(formValues),
       });
-
+  
       if (!response.ok) {
         throw new Error('Erreur lors de l\'ajout du personnel');
       }
-
+  
       const result = await response.json();
       console.log("Personnel ajouté :", result);
-
+  
       setData([...data, result]);
-
+  
       setFormValues({
         matricule: '',
         nom: '',
@@ -217,12 +227,46 @@ export default function Personnel() {
         adresse: '',
         contacte: ''
       });
-
+  
       anaia();
     } catch (error) {
       console.error("Erreur lors de l'ajout du personnel :", error);
     }
   };
+  
+  const handleAddSubmit1 = async () => {
+    try {
+      const response1 = await fetch('http://localhost:3001/notifs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formValues1),
+      });
+  
+      if (!response1.ok) {
+        throw new Error('Erreur lors de l\'ajout de la notification');
+      }
+      const result1 = await response1.json();
+      console.log("Notification ajoutée :", result1);
+  
+      setDataN([...dataN, result1]);
+  
+      setFormValues1({
+        message: '',
+      });
+  
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la notification :", error);
+    }
+  };
+  
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await Promise.all([handleAddSubmit(), handleAddSubmit1()]);
+  };
+  
+
 
   // Fonction pour soumettre le formulaire de modification
   const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -287,6 +331,8 @@ export default function Personnel() {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  
 
   return (
     <div className="flex">
@@ -374,7 +420,7 @@ export default function Personnel() {
           {/* MODAL POUR AJOUTER UN PERSONNEL */}
           <Modal isVisible={isAddModalVisible} onClose={() => setIsAddModalVisible(false)}>
             <h3 className="text-lg font-bold mb-4">Ajouter un personnel</h3>
-            <form onSubmit={handleAddSubmit}>
+            <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-gray-700">Matricule :</label>
                 <input 
@@ -437,6 +483,19 @@ export default function Personnel() {
                   className="w-full border border-gray-300 p-2 rounded-md"  required 
                 />
               </div>
+              <div className="mb-4">
+  
+              {/* AJOUT DU NOTIFICATION */}
+             <input 
+              type="text" 
+              name="contacte" 
+              value={formValues1.message}
+              className="w-full border border-gray-300 p-2 rounded-md"
+              style={{ display: 'none' }} // Cacher l'input
+              required 
+             />
+            </div>
+
               <div className="flex justify-end">
                 <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
                   Enregistrer
@@ -510,12 +569,14 @@ export default function Personnel() {
                   className="w-full border border-gray-300 p-2 rounded-md" 
                 />
               </div>
+             
               <div className="flex justify-end">
                 <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
                   Enregistrer
                 </button>
               </div>
             </form>
+            
           </Modal>
         </div>
       </div>

@@ -11,12 +11,14 @@ export default function Selector() {
     };
 
     return (
-        <div className="relative ml-[20px] bg-slate-800 font-bold float-end">
+        <div className="relative ml-[20px]font-bold float-end">
             <button
                 onClick={toggleMenu}
-                className="py-2 px-4 w-[100px] bg-gray-700 text-white rounded-xl "
+                className="py-2 px-4 bg-gray-700 text-white rounded-xl shadow-lg transition-transform duration-300 ease-in-out hover:bg-gray-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer flex items-center space-x-3"
+                
             >
                 <AiOutlineMenu className="text-[20px] ml-6"/>
+                <p>Select</p>
             </button>
             {isOpen && (
                 <ul className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md z-50">
