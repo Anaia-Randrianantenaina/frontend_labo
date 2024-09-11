@@ -39,7 +39,10 @@ interface AjoutHospiProps {
     }
 
     // États pour les notifications et données hospitalisées
-    const [formValues1, setFormValues1] = useState({ message: "Un nouveau patient est ajouté" });
+    const [formValues1, setFormValues1] = useState({
+        message: 'Un nouveau patient ajouté',
+      });
+    
     const [dataN, setDataN] = useState<NotifData[]>([]);
     const [donnee, setDonnee] = useState<HospitaliseData[]>([]);
     const [lastNum, setLastNum] = useState<string | null>(null);
@@ -105,6 +108,9 @@ interface AjoutHospiProps {
         date_naiss: ""
     });
 
+   
+    
+
     // Gérer les changements dans les inputs du formulaire
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -156,33 +162,36 @@ interface AjoutHospiProps {
     };
 
     // Ajouter une notification
-    const handleAddSubmit1 = async () => {
-        try {
-            const response1 = await fetch('http://localhost:3001/notifs', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formValues1),
-            });
-    
-            if (!response1.ok) {
-                throw new Error('Erreur lors de l\'ajout de la notification');
-            }
-    
-            const result1 = await response1.json();
-            setDataN([...dataN, result1]);
-        } catch (error) {
-            console.error("Erreur lors de l'ajout de la notification:", error);
+  const handleAnaia = async () => {
+    try {
+        const responsee = await fetch('http://localhost:3001/notifs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formValues1),
+        });
+
+        if (!responsee.ok) {
+            throw new Error('Erreur lors de l ajout de la notification');
         }
-    };
+        const result1 = await responsee.json();
+        console.log("Notification ajoutée:", result1);
 
-    // Soumission du formulaire et ajout de la notification
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        await Promise.all([savePatient(e), handleAddSubmit1()]);
-    };
+        setDataN([...dataN, result1]);
 
+        setFormValues1({
+            message: '',
+        });
+    }catch (error){
+        console.error('Erreur lors de l ajout de la notification:', error);
+        }
+  }
+
+  const handle2 = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await Promise.all([savePatient(e), handleAnaia()]);
+  };
     // Récupérer le dernier numéro de patient
     const afficheNum = async () => {
         try {
@@ -199,7 +208,7 @@ interface AjoutHospiProps {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handle2}>
                 <div className="bg-white w-[550px] h-[380px] rounded">
                     <button
                         type="button"
@@ -269,6 +278,14 @@ interface AjoutHospiProps {
                                     className="mt-5 ml-10"
                                 />
                             </LocalizationProvider>
+                            <input 
+              type="text" 
+              name="contacte" 
+              value={formValues1.message}
+              className="w-full border border-gray-300 p-2 rounded-md"
+              style={{ display: 'none' }} // Cacher l'input
+              required 
+             />
                         </div>
                         <div className="mt-5 ml-10">
                             <Button variant="contained" color="primary" type="submit">

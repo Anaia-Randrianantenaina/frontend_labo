@@ -1,15 +1,16 @@
 "use client"
+import { BiListOl } from "react-icons/bi"; 
 import React, { useEffect, useState } from "react";
 import Navbar from "@/app/navbar/navbar";
 import Menu from "../menu/page";
 import { FaArrowRight, FaBaby, FaBrain, FaCalculator, FaEye, FaFirstAid, FaHeartbeat, FaMicroscope, FaStethoscope, FaUser } from "react-icons/fa";
 import DataTable from 'react-data-table-component';
 import { GiScalpel } from "react-icons/gi";
-import { Line } from 'react-chartjs-2';
-import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import {  Bar, Line, Pie, Radar } from 'react-chartjs-2';
+import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement, ArcElement } from 'chart.js';
 
 // Enregistrer les composants nécessaires
-Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+Chart.register(CategoryScale, LinearScale, PointElement, LineElement,BarElement,ArcElement, Title, Tooltip, Legend);
 
 
 
@@ -230,8 +231,42 @@ const parseAge = (age: string): number => {
     { pole: 'POLE PARACLINIQUE', service: 'CRTS', nombre: CRTS },
   ];
 
+  // Calcul du nombre de patients pour chaque pôle
+const poleChirurgie = Orthopedie + Chirurgie + Bloc;
+const poleTeteCou = Opthamologie;
+const poleMedecine = Interne + Cardiologie + Pneumologie + Infectueuse + Oncologie + Psychiatrie + Appareillage;
+const poleMereEnfant = Gynécologie + Pédiatrie + Néonaltologie;
+const poleAnesthesie = Réanimation + Triage;
+const poleParaclinique = Imagérie + CRTS;
 
-// GRAPHE CIRCULAIRE 
+
+
+// GRAPHE
+const barData = {
+  labels: ['Chirurgie', 'Tête et Cou', 'Médecine', 'Mère et Enfant', 'Anesthésie', 'Paraclinique'],
+  datasets: [
+    {
+      label: 'Nombre de patients par pôle',
+      data: [poleChirurgie, poleTeteCou, poleMedecine, poleMereEnfant, poleAnesthesie, poleParaclinique],
+      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1,
+    },
+  ],
+};
+const barOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      beginAtZero: true,
+    },
+    y: {
+      beginAtZero: true,
+    },
+  },
+};
+
 const areaData = {
   labels: ['Homme', 'Femme'],
   datasets: [
@@ -248,7 +283,36 @@ const areaData = {
 const areaOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  
 };
+
+// GRAPHE GENERATIONNEL
+const ScatterData = {
+  labels: ['Enfants', 'Jeunes', 'Adultes', 'Vieux'],
+  datasets: [
+    {
+      label: 'Nombre par génération',
+      data: [Enfant, Jeune, Adulte, Vieux],
+      borderColor: ['#36A2EB', '#FF6384', '#36A2EB', '#FFCE56'],
+      borderWidth: 1,
+      backgroundColor: 'rgba(54, 162, 235, 0.2)', // Ajoute un peu de transparence
+    },
+  ],
+};
+const ScatterOption = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      beginAtZero: true,
+    },
+    y: {
+      beginAtZero: true,
+    },
+  },
+};
+
+
 
   
     return (
@@ -269,21 +333,35 @@ const areaOptions = {
             {/* NOMBRE DE PATIENTS */}
             <div className="flex justify-between mt-[-10px]">
                 {/* NOMBRE HOSPITALISÉ */}
-                <div className="top-[50px] m-10 left-[1.5cm] right-[35cm] w-[500px] h-[130px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto flex items-center justify-center">
+                <div className="top-[50px] m-10 left-[1.5cm] right-[35cm] w-[800px] h-[130px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto flex items-center justify-center">
                    <div className="flex items-center">
                   <FaUser className="text-green-700 text-[50px] mr-4" />
                   <div className="text-center">
                    <h2 className="font-bold text-[30px]">{totalPatientH}</h2>
-                   <p className="text-gray-700 medium">Hospitalisé</p>
-                  <button   className="mt-1 px-4 py-2 border border-green-700 text-green-700 rounded hover:bg-green-50 flex items-center " onClick={openTabH}>
-                  <FaArrowRight className="mr-2" />
-                   Voir Détails
-                  </button>
+                   <p className="text-gray-700 text-[30px] font-bold  medium">Hospitalisés</p>
                   </div>
                  </div>
             </div>
-            {/* Tableau des hospitaliser */}
-            {tabH && (
+
+          
+                {/* TOTAL */}
+           <div className="top-[50px] m-10 left-[1.5cm] right-[35cm] w-[800px] h-[130px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto flex items-center justify-center">
+              <div className="flex items-center">
+              <BiListOl className="text-gray-700 text-[50px] mr-4" />
+              <div className="text-center">
+              <h2 className="font-bold text-[30px]"></h2>
+              <p className="text-gray-700 font-bold text-[30px] medium">Listes</p>
+              <button   className="mt-1 px-4 py-2 border border-green-700 text-green-700 rounded hover:bg-green-50 flex items-center " onClick={openTabH}>
+              <FaArrowRight className="mr-2" />
+               Voir Détails
+               </button>
+              </div>
+              </div>
+          </div>
+
+            </div> 
+             {/* Tableau des hospitaliser */}
+             {tabH && (
               <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg shadow-lg p-6 w-[80%] h-[60%] overflow-auto">
                   <h2 className="text-2xl text-center font-bold mb-4">Détails des Hospitalisés</h2>
@@ -306,42 +384,6 @@ const areaOptions = {
                 </div>
               </div>
             )}
-
-
-                {/* NOMBRE EXTERNE */}
-           <div className="top-[50px] m-10 left-[1.5cm] right-[35cm] w-[500px] h-[130px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto flex items-center justify-center">
-             <div className="flex items-center">
-             <FaUser className="text-blue-700 text-[50px] mr-4" />
-             <div className="text-center">
-             <h2 className="font-bold text-[30px]"></h2>
-             <p className="text-gray-700 medium">Externe</p>
-             <button   className="mt-1 px-4 py-2 border border-green-700 text-green-700 rounded hover:bg-green-50 flex items-center " onClick={openTabE}>
-        <FaArrowRight className="mr-2" />
-        Voir Détails
-      </button>
-             </div>
-            </div>
-           </div>
-
-            
-
-           {/* Tableau des externes */}
-                {/* TOTAL */}
-           <div className="top-[50px] m-10 left-[1.5cm] right-[35cm] w-[500px] h-[130px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto flex items-center justify-center">
-              <div className="flex items-center">
-              <FaCalculator className="text-gray-700 text-[50px] mr-4" />
-              <div className="text-center">
-              <h2 className="font-bold text-[30px]"></h2>
-              <p className="text-gray-700 medium">Total</p>
-              <button   className="mt-1 px-4 py-2 border border-green-700 text-green-700 rounded hover:bg-green-50 flex items-center ">
-        <FaArrowRight className="mr-2" />
-        Voir Détails
-      </button>
-              </div>
-              </div>
-          </div>
-
-            </div> 
 
             {/* TABLEAU DE BORD */}
             <div className="flex justify-center mt-[-17px]">
@@ -447,36 +489,37 @@ const areaOptions = {
 
   {/* NOMBRE DE PATIENT POUR CHAQUE POLE  */}
   <div className="grid grid-cols-2 gap-6 text-gray-800 font-medium text-[15px]">
-    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
-      <FaHeartbeat className="text-red-500" />
-      <p className="hover:text-blue-600">POLE CHIRURGIE : </p>
-    </div>
-    
-    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
-      <FaBrain className="text-purple-500" />
-      <p className="hover:text-blue-600">POLE TÊTE ET COU :</p>
-    </div>
-    
-    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
-      <FaStethoscope className="text-green-500" />
-      <p className="hover:text-blue-600">POLE MEDECINE :</p>
-    </div>
-    
-    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
-      <FaBaby className="text-pink-500" />
-      <p className="hover:text-blue-600">POLE MÈRE ENFANT :</p>
-    </div>
-    
-    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
-      <GiScalpel className="text-blue-700" />
-      <p className="hover:text-blue-600">POLE ANESTHÉSIE RÉANIMATION URGENCE :</p>
-    </div>
-    
-    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
-      <FaMicroscope className="text-yellow-500" />
-      <p className="hover:text-blue-600">POLE PARACLINIQUE :</p>
-    </div>
+  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
+    <FaHeartbeat className="text-red-500" />
+    <p className="hover:text-blue-600">POLE CHIRURGIE : {poleChirurgie} </p>
   </div>
+
+  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
+    <FaBrain className="text-purple-500" />
+    <p className="hover:text-blue-600">POLE TÊTE ET COU : {poleTeteCou}</p>
+  </div>
+
+  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
+    <FaStethoscope className="text-green-500" />
+    <p className="hover:text-blue-600">POLE MEDECINE : {poleMedecine}</p>
+  </div>
+
+  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
+    <FaBaby className="text-pink-500" />
+    <p className="hover:text-blue-600">POLE MÈRE ENFANT : {poleMereEnfant}</p>
+  </div>
+
+  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
+    <GiScalpel className="text-blue-700" />
+    <p className="hover:text-blue-600">POLE ANESTHÉSIE RÉANIMATION URGENCE : {poleAnesthesie}</p>
+  </div>
+
+  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
+    <FaMicroscope className="text-yellow-500" />
+    <p className="hover:text-blue-600">POLE PARACLINIQUE : {poleParaclinique}</p>
+  </div>
+</div>
+
   {/* Bouton Voir Détails */}
   <div className="flex justify-center mt-6">
     <button
@@ -531,17 +574,20 @@ const areaOptions = {
             {/* Graphe generationnel */}
             <div className=" top-[50px] mx-10 left-[1.5cm] right-[35cm] w-[400px] h-[300px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto">
               <p className="text-center">Géneration</p>
+              <Line data={ScatterData} options={ScatterOption}/>
             </div>
 
             </div>
 
-            {/* GRAPHE TOTAL */}
+            {/* GRAPHE PAR POLE */}
             <div className="flex justify-normal mt-[-10px]">
 
-            <div className="top-[50px] m-10 left-[1.5cm] right-[35cm] w-[1220px] h-[210px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto">
-             <p className="text-center">GRAPHE GENERATIONNEL</p>
-           </div>
-
+            <div className="top-[50px] m-10 w-[1200px] h-[220px] bg-slate-50 shadow-lg z-10 p-4 overflow-auto rounded-3xl flex items-center justify-center">
+              <div className="w-full h-full">
+             <Bar data={barData}  options={ barOptions }/>
+             </div>
+            </div>
+            {/* GRAPHE SEXE */}
            <div className="relative mt-7 w-[500px] h-[220px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4">
             <p className="text-center">Sexe</p>
             <div className="w-full h-full pb-2">
