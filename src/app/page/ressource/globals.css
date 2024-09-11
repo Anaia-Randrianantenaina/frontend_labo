@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .animation-delay-100 {
+    animation-delay: 0.1s;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 0.4s;
+  }
+
+  .animationBlink {
+    animation-name: blink;
+    animation-duration: 0.2s;
+    animation-iteration-count: infinite;  /* Répéter l'animation indéfiniment */
+}
+
+@keyframes blink {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}

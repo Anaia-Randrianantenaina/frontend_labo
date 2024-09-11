@@ -14,7 +14,6 @@ import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import LocaleProvider from "antd/es/locale";
 import { DatePicker } from "antd";
-import Menu from "../../materiel/menu/page";
 
 export default function listeRessource() {
     // Composant de chargement personnalisé
@@ -27,10 +26,29 @@ export default function listeRessource() {
         );
     }
 
+    function Indice() {
+        return(
+            <div>
+                <Tooltip title="Niveau de stock Basse" placement="right" arrow >
+                    <button className="cursor-pointers opacity-0.5" >
+                        <Image
+                            src="/pic/exclamation_mark_32px.png"
+                            alt="Next.js Logo"
+                            width={22}
+                            height={30}
+                        />
+                    </button>
+                </Tooltip>
+            </div>
+        )
+    }
+
 
     // Définition de l'interface pour les données de les materiels
     interface RessourceData {
-        id: string;
+        id: number;
+
+        presentation : string;
 
         designation: string;
 
@@ -56,7 +74,7 @@ export default function listeRessource() {
 
         dosage: number;
 
-        ajoute: number
+        utilise: number
     }
 
 
@@ -81,8 +99,10 @@ export default function listeRessource() {
         day: 'numeric'
     });
 
+    const [ident,setIdent] = useState("")
+
     const [formValues, setFormValues] = useState({
-        id: "",
+        presentation : "",
 
         designation: "",
 
@@ -96,9 +116,9 @@ export default function listeRessource() {
 
         contenu: null,
 
-        prix: 0,
+        prix: null,
 
-        date_prescription: "",
+        date_prescription: null,
 
         numero_lot: null,
 
@@ -108,7 +128,7 @@ export default function listeRessource() {
 
         dosage: 1,
 
-        ajoute : 0
+        utilise : 0
     });
 
     let [plus,setPlus] = useState(0);  
@@ -117,7 +137,7 @@ export default function listeRessource() {
     const daty = date;
     const [historiqueValues, setHistoriqueValues] = useState({
         date: daty,
-        description: formValues.id,
+        description: formValues.presentation,
         action: 'ajout de ressource',
         nombre: 1,
         quantite: formValues.quantite + " " + formValues.unite,
@@ -132,10 +152,31 @@ export default function listeRessource() {
     const [searchTerm, setSearchTerm] = useState("");
 
     const filterData = data.filter(ressource => {
-        return ressource.id.toLocaleLowerCase().includes(searchTerm)
+        return ressource.presentation.toLocaleLowerCase().includes(searchTerm)
     })
 
+    const nfmaxData = data.filter(ressource => {
+        return ((ressource.contenu * ressource.dosage_forme * ressource.quantite * ressource.dosage) > (3 * ressource.utilise))
+    })
+
+    const nfminData = data.filter(ressource => {
+        return ((ressource.contenu * ressource.dosage_forme * ressource.quantite * ressource.dosage) < (3 * ressource.utilise))
+    })
+
+    const nfegData = data.filter(ressource => {
+        return ((ressource.contenu * ressource.dosage_forme * ressource.quantite * ressource.dosage) === (3*ressource.utilise))
+    })
+
+ const nfmax = nfmaxData.length;
+
+ const nfeg = nfegData.length;
+
+ const nfplusmin = nfminData.length;
+
+ const nfmin = nfplusmin + nfeg;
     // isa
+
+    const [indice, setIndice] = useState('');
     const tambatra = data.length;
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,7 +186,7 @@ export default function listeRessource() {
     // Affichage des listes des ressources: 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:3001/ressource/liste');
+            const response = await fetch('http://localhost:3001/intrant/liste');
 
             if (!response.ok) {
                 throw new Error('Erreur réseau');
@@ -178,12 +219,11 @@ export default function listeRessource() {
         });
 
 
-    // Fonction d'ajout des nouveaux materiels : 
+    // Fonction d'ajout des nouveaux ressources : 
     const ajoutRessource = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // setFormValues({ ...formValues, id: formValues.designation+"/"+formValues.forme+"*"+formValues.dosage_forme+formValues.unite_dosage })
         try {
-            const response = await fetch('http://localhost:3001/ressource/ajout',
+            const response = await fetch('http://localhost:3001/intrant/ajout',
                 {
                     method: 'POST',
                     headers: {
@@ -199,7 +239,7 @@ export default function listeRessource() {
                 setData([...data, result]);
                 aseho();
                 setFormValues({
-                    id: "",
+                    presentation : "",
 
                     designation: "",
 
@@ -213,50 +253,73 @@ export default function listeRessource() {
 
                     contenu: null,
 
-                    prix: 0,
+                    prix: null,
 
-                    date_prescription: date,
+                    date_prescription: null,
 
                     numero_lot: null,
 
-                    quantite: null,
+                    quantite: 0,
 
                     unite_mesure: "pièce",
 
                     dosage: 1,
+
+                    utilise : 0
                 });
+                
+
+                e.preventDefault();
+                try {
+                    const response = await fetch('http://localhost:3001/historique/ajout',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(historiqueValues),
+                        });
+        
+                    const result = await response.json();
+                    console.log("Historique ajoutée:", result);
+                    window.location.href = ''
+                } catch (error) {
+                    console.error("Erreur lors de la récupération des données :", error);
+                }
             }
             else {
                 // Si le succès n'est pas true
                 console.error("Erreur lors de l'ajout de la ressource : ", result.message);
                 asehoErreur();
-                setFormValues({
-                    id: "",
+                // setFormValues({
+                //     presentation: "",
 
-                    designation: "",
+                //     designation: "",
 
-                    forme: "pièce",
+                //     forme: "pièce",
 
-                    dosage_forme: 1,
+                //     dosage_forme: 1,
 
-                    unite_dosage: "",
+                //     unite_dosage: "",
 
-                    unite: "",
+                //     unite: "",
 
-                    contenu: null,
+                //     contenu: null,
 
-                    prix: 0,
+                //     prix: null,
 
-                    date_prescription: date,
+                //     date_prescription: null,
 
-                    numero_lot: null,
+                //     numero_lot: null,
 
-                    quantite: null,
+                //     quantite: null,
 
-                    unite_mesure: "pièce",
+                //     unite_mesure: "pièce",
 
-                    dosage: 1,
-                });
+                //     dosage: 1,
+
+                //     utilise : 0
+                // });
             }
         }
         catch (error) {
@@ -264,23 +327,35 @@ export default function listeRessource() {
         }
 
         // mampiditra any amin'ny historique
-        e.preventDefault();
-        try {
-            const response = await fetch('http://localhost:3001/historique/ajout',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(historiqueValues),
-                });
-
-            const result = await response.json();
-            console.log("Historique ajoutée:", result);
-        } catch (error) {
-            console.error("Erreur lors de la récupération des données :", error);
-        }
+       
     };
+
+
+    // Modification des ressources :
+    const modificationRessource = async (e : React.FormEvent<HTMLFormElement>) => {
+        try {
+            const response = await fetch(`http://localhost:3001/intrant/modification/${ident}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formValues),
+              });
+    
+            //   if (!response.ok) {
+            //     throw new Error('Erreur lors de la modification du personnel');
+            //   }
+            //   else{
+            //     const result = await response.json();    
+            //   console.log("Materiel modifié :", result);
+            //   setData(filterData.map(ressource => ressource.id === result.id ? result : ressource));
+             
+            //   }
+               setShow1(!show1);
+        } catch (error) {
+            
+        }
+    }
 
 
 
@@ -315,7 +390,7 @@ export default function listeRessource() {
     // Fonction pour gérer les changements dans les champs du formulaire
     const [errors, setErrors] = useState('');
     const handleInputChangeId = () => {
-        setFormValues({ ...formValues, id: formValues.designation + "/" + formValues.forme + "*" + formValues.dosage_forme + formValues.unite_dosage })
+        setFormValues({ ...formValues, presentation: formValues.designation + "/" + formValues.forme + "*" + formValues.dosage_forme + formValues.unite_dosage })
         const descri = formValues.designation + "/" + formValues.forme + "*" + formValues.dosage_forme + formValues.unite_dosage;
         setHistoriqueValues({
             date: daty,
@@ -330,128 +405,171 @@ export default function listeRessource() {
 
     // Nouveau qunantité
     const Change_0 = () => {
-      setPlus(0)
+        
+        if (formValues.quantite < plus) {
+
+        }
+        else {
+            let a = formValues.quantite;
+            setFormValues({ ...formValues, quantite: a - plus })
+            setPlus(0)
+        }
     };
     const Change_1 = () => {
         if (plus < 1) {
-            setPlus(plus)
-        }   
-        else{
-             setPlus(plus-1)
+
+        }
+        else {
+            setPlus(plus - 1)
+            let a = formValues.quantite;
+            setFormValues({ ...formValues, quantite: a - 1 })
         }
         
       
     };
     const Change_2 = () => {
-        setPlus(plus+1)
+        setPlus(plus + 1)
+        let a = formValues.quantite;
+        setFormValues({ ...formValues, quantite: a + 1 })
      };
      const Change_3 = () => {
-        setPlus(plus+10)
+        setPlus(plus + 10)
+        let a = formValues.quantite;
+        setFormValues({ ...formValues, quantite: a + 10 })
      };
 
     
     // Fonction pour ouvrir le modal d'édition avec les informations du personnel sélectionné
   const handleEdit = (ressource: RessourceData) => {
     setFormValues(ressource);
+    setIdent(ressource.id)
     //setHistoriqueModif({ ...historiqueModif, description: materiel.nom_materiel + "_" + materiel.id })
     setShow1(true);
   };
 
-    const columns = [
-        {
-            name: "Designation/Forme*Dosage",
-            selector: (row: RessourceData) => row.id,
-            sortable: true,
-            width: "250px",
-            cell: row => (
-                <div style={{ backgroundColor: '#f0f0f0', padding: '10px' }}>
-                    {row.id}
-                </div>
-            ),
-        },
-        {
-            name: "Unite",
-            selector: (row: RessourceData) => row.unite,
-            sortable: true,
-            width: "100px",
-            cell: row => (
+  const columns = [  
+    {
+        name: "N°",
+        selector: (row: RessourceData) => row.id,
+        sortable: true,
+        width: "80px",
+        cell: row => (
+            <div>
+                {row.id} 
+            </div>
+        )
+    },
+    {
+        name: "Designation/Forme*Dosage",
+        selector: (row: RessourceData) => row.presentation,
+        sortable: true,
+        width: "250px",
+        cell: row => (
+            <div style={{ backgroundColor: '#f0f0f0', padding: '10px' }}>
+                {row.presentation}
+            </div>
+        ),
+    },
+    {
+        name: "Unite",
+        selector: (row: RessourceData) => row.unite,
+        sortable: true,
+        width: "150px",
+        cell: row => (
+            <div>
+                {row.unite} / {row.contenu}
+            </div>
+        )
+    },
+    {
+        name: "Prix Unitaire ",
+        selector: (row: RessourceData) => row.prix,
+        sortable: true,
+        width: "150px",
+        cell: row => (
+            <div>
+                {row.prix} Ariary /{row.unite}
+            </div>
+        )
+    },
+    {
+        name: "Préscription",
+        selector: (row: RessourceData) => row.date_prescription,
+        sortable: true,
+        width: "150px"
+    },
+    {
+        name: "N° Lot",
+        selector: (row: RessourceData) => row.numero_lot,
+        sortable: true,
+        width: "150px"
+    },
+    {
+        name: "Qt Physique",
+        selector: (row: RessourceData) => row.quantite,
+        sortable: true,
+        width: "150px",
+        cell: row => (
+            <div>
+                    • {Math.round((row.contenu * row.dosage_forme * row.quantite * row.dosage - row.utilise)/(row.dosage * row.dosage_forme))} {row.forme}<br></br>
+                    • {Math.round((row.contenu * row.dosage_forme * row.quantite * row.dosage - row.utilise)/(row.dosage * row.dosage_forme * row.contenu))} {row.unite} <br></br>
+                
+            </div>
+        )
+    },
+    {
+        name: "Qt Théorique",
+        selector: (row: RessourceData) => row.quantite,
+        sortable: true,
+        width: "160px",
+        cell: row => {
+            const quantiteTheorique = row.contenu * row.dosage_forme * row.quantite * row.dosage - row.utilise;
+            const alerte = quantiteTheorique < (3 * row.utilise);
+            return (
                 <div>
-                    {row.unite} / {row.contenu}
+                    {/* Affichage de la quantité théorique */}
+                    {alerte && <span className="flex text-red-600 text-2xs animate-blink-fast rounded-ful">  <Image
+                            onClick={() => handleEdit(row)}
+                            class="animationBlink" 
+                            src="/pic/exclamation_mark_32px.png"
+                            alt="Next.js Logo"
+                            width={15}
+                            height={17}
+                        /> <h1 class="animationBlink"> Quantité critique </h1> </span>}
+                   
+                    {/* Calcul arrondi */}
+                    • {quantiteTheorique} {row.unite_mesure}<br/>  
+                    • {Math.round(quantiteTheorique / row.dosage)} {row.unite_dosage}<br/>
+                    {/* Affichage de l'alerte si la condition est remplie */}               
+                  
                 </div>
-            )
-        },
-        {
-            name: "Prix Unitaire ",
-            selector: (row: RessourceData) => row.prix,
-            sortable: true,
-            width: "150px",
-            cell: row => (
-                <div>
-                    {row.prix} Ariary /{row.unite}
-                </div>
-            )
-        },
-        {
-            name: "Date de Prescription",
-            selector: (row: RessourceData) => row.date_prescription,
-            sortable: true,
-            width: "200px"
-        },
-        {
-            name: "N° Lot",
-            selector: (row: RessourceData) => row.numero_lot,
-            sortable: true,
-            width: "100px"
-        },
-        {
-            name: "Quantite Physique",
-            selector: (row: RessourceData) => row.quantite,
-            sortable: true,
-            width: "180px",
-            cell: row => (
-                <div>
+            );
+        }
+    },
+    
+    {
+        name: "",
+        selector: row => row.action,
+        sortable: true,
+        width: "80px",
+        cell: row => (
+            <div>
+                <Tooltip title="Nouveau quantité" placement="right" arrow >
+                    <button className="cursor-pointers opacity-0.5" >
+                        <Image
+                            onClick={() => handleEdit(row)}
+                            src="/pic/add_list_24px.png"
+                            alt="Next.js Logo"
+                            width={22}
+                            height={30}
+                        />
 
-                    • {row.quantite} {row.unite}(s) <br></br>
-                    • {row.contenu * row.quantite} {row.forme}(s)
-                </div>
-            )
-        },
-        {
-            name: "Quantite Théorique",
-            selector: (row: RessourceData) => row.quantite,
-            sortable: true,
-            width: "180px",
-            cell: row => (
-                <div>
-                    • {row.contenu * row.dosage_forme * row.quantite} {row.unite_dosage} <br></br>
-                    • {row.contenu * row.dosage_forme * row.quantite * row.dosage} {row.unite_mesure}
-                </div>
-            )
-        },
-
-        {
-            name: "ACTION",
-            selector: row => row.action,
-            sortable: true,
-            width: "100px",
-            cell: row => (
-                <div>
-                    <Tooltip title="Nouveau quantité" placement="right" arrow >
-                        <button className="cursor-pointers opacity-0.5" >
-                            <Image
-                               onClick={() => handleEdit(row)}
-                                src="/pic/add_list_24px.png"
-                                alt="Next.js Logo"
-                                width={22}
-                                height={30}
-                            />
-
-                        </button>
-                    </Tooltip>
-                </div>
-            )
-        },
-    ]
+                    </button>
+                </Tooltip>
+            </div>
+        )
+    },
+]
     // const data = [
     //     {
     //         id: "Lipase flacon*60ml", unite: "Boite/100", date: "10/11/2025", num: "17042", quantite_p: "12 Boite ", quantite_t: "72000 ul", prix: "10000 Ariary ",
@@ -478,7 +596,7 @@ export default function listeRessource() {
 
         setTimeout(() => {
             setLoading(false);
-        }, 2000); // Délai de 2 secondes pour simuler le chargement des données
+        }, 1000); // Délai de 2 secondes pour simuler le chargement des données
     }, [])
 
     //Pagination
@@ -505,8 +623,7 @@ export default function listeRessource() {
     const fermeture = async (id) => {
         setShow(!show);
         setFormValues({
-
-            id: "",
+            presentation : "",
 
             designation: "",
 
@@ -520,9 +637,9 @@ export default function listeRessource() {
 
             contenu: null,
 
-            prix: 0,
+            prix: null,
 
-            date_prescription: date,
+            date_prescription: null,
 
             numero_lot: null,
 
@@ -531,6 +648,8 @@ export default function listeRessource() {
             unite_mesure: "pièce",
 
             dosage: 1,
+
+            utilise : 0
 
         });
     }
@@ -538,8 +657,7 @@ export default function listeRessource() {
     const fermeture1 = async (id) => {
         setShow1(!show1);
         setFormValues({
-
-            id: "",
+            presentation: "",
 
             designation: "",
 
@@ -553,19 +671,22 @@ export default function listeRessource() {
 
             contenu: null,
 
-            prix: 0,
+            prix: null,
 
-            date_prescription: date,
+            date_prescription: null,
 
             numero_lot: null,
 
-            quantite: null,
+            quantite: 0,
 
             unite_mesure: "pièce",
 
             dosage: 1,
 
+            utilise : 0
+
         });
+        setPlus(0)
     }
 
     const [show5, setShow5] = useState(false);
@@ -588,8 +709,12 @@ export default function listeRessource() {
                 <Navbar />
                 <div className="w-full h-[100vh] p-2">
 
-                    <div>
-                        <Menu/>
+                <div className="w-full h-[9%] shadow-md  border border-gray-100 rounded">
+                        <p className="text-[15px] p-5 text-center"> LISTES DES MATERIELS ET RESSOURCES
+                            <button className=" fixed mx-[20%]"><BiMessageAltError /></button>
+                            <button className=" fixed mx-[22%]"><IoMdNotificationsOutline /></button>
+                            <button className="fixed mx-[24%]"><AiOutlineUser /></button>
+                            <button className="fixed mx-[26%] font-medium">  Utilisateur  </button></p>
                     </div>
                     {/* tsy kitihina */}
                     <div className="w-full h-[2%]"></div>
@@ -654,7 +779,7 @@ export default function listeRessource() {
                                         N.S.Max
                                     </button>
                                     <button className="text-black ml-[50%] mt-1 font-extrabold text-[30px]">
-                                        20
+                                        {nfmax}
                                     </button>
                                 </div>
                             </Tooltip>
@@ -675,7 +800,7 @@ export default function listeRessource() {
                                         N.S.Min
                                     </button>
                                     <button className="text-black ml-[50%] mt-1 font-extrabold text-[30px]">
-                                        20
+                                        {nfmin}
                                     </button>
                                 </div>
                             </Tooltip>
@@ -705,7 +830,7 @@ export default function listeRessource() {
                                 alt="Next.js Logo"
                                 width={25}
                                 height={30}
-                            />  <h2 className="opacity-0">Trouver</h2> </button>
+                            />  <h2  className="opacity-0">Trouver</h2> </button>
                             {loading ? (
                                 <LoadingSpinner />
                             ) : (
@@ -738,7 +863,7 @@ export default function listeRessource() {
                                     <div id="modal" className="bg-white border shadow mt-[2%]  pb-4 p-3 justify-center items-center">
                                         <form onSubmit={ajoutRessource}>
                                             <div className="flex justify-center items-center text-green-900">
-                                                INFORMATIONS CONCERNANT CE RESSOURCE : Id <input className="border-none bg-none text-center" value={formValues.id} required />
+                                                INFORMATIONS CONCERNANT CE RESSOURCE : Id <input className="border-none bg-none text-center" value={formValues.presentation} required />
                                             </div>
                                             <hr className="mx-[10%]"></hr>
                                             {/* <div className="flex justify-center items-center">
@@ -769,7 +894,7 @@ export default function listeRessource() {
                                                 />
                                                 <h4 className="mx-3 mt-2 text-sm text-gray-500"> * Date de prescription</h4>
                                                {/* <TextField className="ml-[5%] mt-[5%] mb-3 w-[70%]" value={formValues.date_prescription} name="date_prescription" label="Date de Préscription" variant="outlined" /> */}
-                                                <TextField required className="ml-[5%] mr-[5%] mt-[5%] mb-3 w-[60%]" value={formValues.numero_lot} onChange={handleInputChangeNumeric} type="number" name="numero_lot" label="N° Lot" variant="outlined" /> <br></br>
+                                                <TextField className="ml-[5%] mr-[5%] mt-[5%] mb-3 w-[60%]" value={formValues.numero_lot} onChange={handleInputChangeNumeric} type="number" name="numero_lot" label="N° Lot" variant="outlined" /> <br></br>
                                             </div>
                                             <div className="flex justify-center items-center">
                                                 <TextField required className="ml-[5%] mt-[5%] mb-3 w-[70%]" value={formValues.quantite} onChange={handleInputChangeNumeric} name="quantite" label="Quantité" variant="outlined" />
@@ -781,12 +906,13 @@ export default function listeRessource() {
                                                     <div id="errorTooltip" className="bg-none text-red-600  flex text-sm ml-10 pt-2 px-3 animate-bounce animation-delay-100">
                                                         <Image
                                                             onClick={() => tog1(id)}
+                                                            class="animationBlink"
                                                             className="mx-2"
                                                             src="/pic/high_priority_26px.png"
                                                             alt="Next.js Logo"
                                                             width={20}
                                                             height={10}
-                                                        />  {errors1}
+                                                        />  <h1> {errors1} </h1> 
                                                     </div>
                                                 )}
 
@@ -812,9 +938,9 @@ export default function listeRessource() {
                             {
                                 isClient && (
                                     <div id="modal" className="bg-white border shadow mt-[2%]  pb-4 p-3 justify-center items-center">
-                                        <form>
+                                        <form onSubmit={modificationRessource}>
                                             <div className="flex justify-center items-center text-green-900">
-                                                INFORMATIONS CONCERNANT CE RESSOURCE
+                                                INFORMATIONS CONCERNANT CE RESSOURCE : ID • {ident}
                                             </div>
                                             <hr className="mx-[10%]"></hr>
                                             <div className="flex justify-center items-center">
@@ -830,11 +956,11 @@ export default function listeRessource() {
                                                 <TextField required className="ml-[5%] mr-[5%] mt-[5%] mb-3 w-[70%]" label="Prix Unitaire" value={formValues.prix} variant="outlined" /> <br></br>
                                             </div>
                                             <div className="flex justify-center items-center">
-                                                <TextField required className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Date de Préscription" value={formValues.date_prescription} variant="outlined" />
-                                                <TextField required className="ml-[5%] mr-[5%] mt-[5%] mb-3 w-[70%]" label="N° Lot" value={formValues.numero_lot} variant="outlined" /> <br></br>
+                                                <TextField  className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Date de Préscription" value={formValues.date_prescription} variant="outlined" />
+                                                <TextField  className="ml-[5%] mr-[5%] mt-[5%] mb-3 w-[70%]" label="N° Lot" value={formValues.numero_lot} variant="outlined" /> <br></br>
                                             </div>
                                             <div className="flex justify-center items-center">
-                                                <TextField required className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Quantié actuel" value={formValues.quantite} variant="outlined" />
+                                                <TextField required className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Quantié actuel" value={formValues.quantite}  variant="outlined" />
                                                 <TextField required className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Quantié Venue" value={plus} variant="outlined" />
                                                 <TextField required className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Unité de Mesure * U.M" value={formValues.unite_mesure} variant="outlined" /> <br></br>
                                                 <TextField required type="number" className="ml-[5%] mr-[5%] mt-[5%] mb-3 w-[70%]" label="1 Dosage = ... U.M" value={formValues.dosage} variant="outlined" /> <br></br>
@@ -859,8 +985,8 @@ export default function listeRessource() {
 
                                                 </div>
                                                 {/* <TextField required type="number" name="ajoute" className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Quantié arrivé(e)" variant="outlined" /> */}
-                                                <TextField required className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Date Préscription" variant="outlined" /> <br></br>
-                                                <TextField required className="ml-[5%] mr-[5%] mt-[5%] mb-3 w-[70%]" label="Numero Lot" variant="outlined" /> <br></br>
+                                                <TextField  className="ml-[5%] mt-[5%] mb-3 w-[70%]" label="Date Préscription" variant="outlined" /> <br></br>
+                                                <TextField  className="ml-[5%] mr-[5%] mt-[5%] mb-3 w-[70%]" label="Numero Lot" variant="outlined" /> <br></br>
                                             </div>
                                             <div className="flex justify-center items-center">
                                                 <button type="submit" className=" mt-[5%]  bg-green-600 px-5 py-1 rounded text-white font-medium">  Confirmer </button>
@@ -909,3 +1035,6 @@ export default function listeRessource() {
 function isAfter(date: string, today: Date) {
     throw new Error("Function not implemented.");
 }
+
+
+

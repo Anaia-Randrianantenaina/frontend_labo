@@ -235,31 +235,36 @@ export default function Personnel() {
   };
   // Ajout de notification
   const handleAddSubmit1 = async () => {
+    console.log("Données de notification envoyées :", formValues1);
     try {
-      const response1 = await fetch('http://localhost:3001/notifs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formValues1),
-      });
-  
-      if (!response1.ok) {
-        throw new Error('Erreur lors de l\'ajout de la notification');
-      }
-      const result1 = await response1.json();
-      console.log("Notification ajoutée :", result1);
-  
-      setDataN([...dataN, result1]);
-  
-      setFormValues1({
-        message: '',
-      });
-  
+        const response = await fetch('http://localhost:3001/notifs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formValues1),
+        });
+
+        const responseText = await response.text(); // Lire la réponse sous forme de texte brut pour inspection
+        console.log("Réponse brute:", responseText);
+
+        if (!response.ok) {
+            console.error('Erreur dans la requête de notification:', response.status, response.statusText);
+            throw new Error(`Erreur lors de l'ajout de la notification : ${response.statusText}`);
+        }
+
+        const result = JSON.parse(responseText);
+        console.log("Notification ajoutée avec succès:", result);
+        setDataN([...dataN, result]);
+
+        setFormValues1({
+            message: '',
+        });
     } catch (error) {
-      console.error("Erreur lors de l'ajout de la notification :", error);
+        console.error('Erreur capturée lors de l\'ajout de la notification:', error);
     }
-  };
+};
+
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

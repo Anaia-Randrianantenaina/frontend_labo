@@ -12,21 +12,19 @@ import dayjs from 'dayjs';
 interface AjoutHospiProps {
     isVisible: boolean;
     onClose: () => void;
-  }
+}
 
-  export default function AjoutHospi({ isVisible, onClose }: AjoutHospiProps) {
+export default function AjoutHospi({ isVisible, onClose }: AjoutHospiProps) {
     if (!isVisible) return null;
 
     useEffect(() => {
         afficheNum(); // Récupérer le dernier numéro de patient au montage du composant
     }, []);
 
-    // Interface pour les notifications
     interface NotifData {
         message: string;
     }
 
-    // Interface pour les données hospitalisées
     interface HospitaliseData {
         num: string;
         nom: string;
@@ -38,29 +36,23 @@ interface AjoutHospiProps {
         date_naiss: string;
     }
 
-    // États pour les notifications et données hospitalisées
     const [formValues1, setFormValues1] = useState({
         message: 'Un nouveau patient ajouté',
-      });
-    
+    });
+
     const [dataN, setDataN] = useState<NotifData[]>([]);
     const [donnee, setDonnee] = useState<HospitaliseData[]>([]);
     const [lastNum, setLastNum] = useState<string | null>(null);
 
-    // États pour la date sélectionnée et l'âge
     const [selectDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
     const [age, setAge] = useState<string | null>(null);
-
-    // État pour le numéro de patient
     const [count, setCount] = useState(0);
 
-    // Calculer l'âge à partir de la date de naissance
     const calculateAge = (date: dayjs.Dayjs) => {
         const today = dayjs();
         return today.year() - date.year();
     };
 
-    // Gestion des changements de date et calcul de l'âge
     const handleDateChange = (newValue: dayjs.Dayjs | null) => {
         setSelectedDate(newValue);
         if (newValue) {
@@ -74,7 +66,6 @@ interface AjoutHospiProps {
         }
     };
 
-    // Notification de succès et d'erreur
     const message = () => toast.success('Patient hospitalisé enregistré', {
         position: "top-center",
         autoClose: 1500,
@@ -96,7 +87,6 @@ interface AjoutHospiProps {
         theme: "colored",
     });
 
-    // État pour le formulaire hospitalisé
     const [formValues, setFormValues] = useState({
         num: "",
         nom: "",
@@ -108,10 +98,6 @@ interface AjoutHospiProps {
         date_naiss: ""
     });
 
-   
-    
-
-    // Gérer les changements dans les inputs du formulaire
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormValues({
@@ -120,14 +106,11 @@ interface AjoutHospiProps {
         });
     };
 
-    // Fonction pour ajouter un patient hospitalisé
-    const savePatient = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-    
+    const savePatient = async () => {
         const newCount = count + 1;
         const updatedFormValues = { ...formValues, num: newCount.toString() };
         setCount(newCount);
-    
+
         try {
             const response = await fetch('http://localhost:3001/Hospitalises', {
                 method: 'POST',
@@ -136,15 +119,14 @@ interface AjoutHospiProps {
                 },
                 body: JSON.stringify(updatedFormValues),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Erreur lors de l\'ajout du nouvel hospitalisé');
             }
-    
+
             const result = await response.json();
             setDonnee([...donnee, result]);
-    
-            // Réinitialiser les champs du formulaire
+
             setFormValues({
                 num: "",
                 nom: "",
@@ -155,44 +137,39 @@ interface AjoutHospiProps {
                 age: "",
                 date_naiss: ""
             });
+
             message(); // Afficher un message de succès
         } catch (error) {
             messageErreur(); // Afficher un message d'erreur
         }
     };
 
-    // Ajouter une notification
-  const handleAnaia = async () => {
-    try {
-        const responsee = await fetch('http://localhost:3001/notifs', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formValues1),
-        });
+    const handleAnaia = async () => {
+        try {
+            const responsee = await fetch('http://localhost:3001/notifs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formValues1),
+            });
 
-        if (!responsee.ok) {
-            throw new Error('Erreur lors de l ajout de la notification');
+            if (!responsee.ok) {
+                throw new Error('Erreur lors de l ajout de la notification');
+            }
+
+            const result1 = await responsee.json();
+            console.log("Notification ajoutée:", result1);
+            setDataN([...dataN, result1]);
+
+            setFormValues1({
+                message: '',
+            });
+        } catch (error) {
+            console.error('Erreur lors de l ajout de la notification:', error);
         }
-        const result1 = await responsee.json();
-        console.log("Notification ajoutée:", result1);
+    };
 
-        setDataN([...dataN, result1]);
-
-        setFormValues1({
-            message: '',
-        });
-    }catch (error){
-        console.error('Erreur lors de l ajout de la notification:', error);
-        }
-  }
-
-  const handle2 = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await Promise.all([savePatient(e), handleAnaia()]);
-  };
-    // Récupérer le dernier numéro de patient
     const afficheNum = async () => {
         try {
             const response = await fetch("http://localhost:3001/hospitalises/last-num");
@@ -206,9 +183,15 @@ interface AjoutHospiProps {
         }
     };
 
+    const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        await savePatient();
+        await handleAnaia();
+    };
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center">
-            <form onSubmit={handle2}>
+            <form onSubmit={handleSave}>
                 <div className="bg-white w-[550px] h-[380px] rounded">
                     <button
                         type="button"
@@ -226,72 +209,61 @@ interface AjoutHospiProps {
                         <p className="ml-2 mt-1 font-bold text-[22px]">Nouveau patient hospitalisé</p>
                     </div>
 
-                    {/* Formulaire d'ajout d'hospitalisation */}
                     <div className="mt-3">
-                        <div>
-                            <TextField
-                                label="Nom*"
-                                name="nom"
-                                value={formValues.nom}
-                                onChange={handleInputChange}
-                                variant="outlined"
-                                className="mt-2 ml-10"
-                            />
-                            <TextField
-                                label="Prénom"
-                                name="prenom"
-                                value={formValues.prenom}
-                                onChange={handleInputChange}
-                                variant="outlined"
-                                className="mt-2 ml-10"
-                            />
-                            <TextField
-                                label="Adresse"
-                                name="adresse"
-                                value={formValues.adresse}
-                                onChange={handleInputChange}
-                                variant="outlined"
+                        <TextField
+                            label="Nom*"
+                            name="nom"
+                            value={formValues.nom}
+                            onChange={handleInputChange}
+                            variant="outlined"
+                            className="mt-2 ml-10"
+                        />
+                        <TextField
+                            label="Prénom"
+                            name="prenom"
+                            value={formValues.prenom}
+                            onChange={handleInputChange}
+                            variant="outlined"
+                            className="mt-2 ml-10"
+                        />
+                        <TextField
+                            label="Adresse"
+                            name="adresse"
+                            value={formValues.adresse}
+                            onChange={handleInputChange}
+                            variant="outlined"
+                            className="mt-5 ml-10"
+                        />
+                        <TextField
+                            label="Service*"
+                            name="service"
+                            value={formValues.service}
+                            onChange={handleInputChange}
+                            variant="outlined"
+                            className="mt-5 ml-10"
+                        />
+                        <TextField
+                            label="Sexe*"
+                            name="sexe"
+                            value={formValues.sexe}
+                            onChange={handleInputChange}
+                            variant="outlined"
+                            className="mt-5 ml-10"
+                        />
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                                maxDate={dayjs()}
+                                label="Date de naissance*"
+                                value={selectDate}
+                                onChange={handleDateChange}
                                 className="mt-5 ml-10"
                             />
-                            <TextField
-                                label="Service*"
-                                name="service"
-                                value={formValues.service}
-                                onChange={handleInputChange}
-                                variant="outlined"
-                                className="mt-5 ml-10"
-                            />
-                            <TextField
-                                label="Sexe*"
-                                name="sexe"
-                                value={formValues.sexe}
-                                onChange={handleInputChange}
-                                variant="outlined"
-                                className="mt-5 ml-10"
-                            />
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker
-                                    maxDate={dayjs()}
-                                    label="Date de naissance*"
-                                    value={selectDate}
-                                    onChange={handleDateChange}
-                                    className="mt-5 ml-10"
-                                />
-                            </LocalizationProvider>
-                            <input 
-              type="text" 
-              name="contacte" 
-              value={formValues1.message}
-              className="w-full border border-gray-300 p-2 rounded-md"
-              style={{ display: 'none' }} // Cacher l'input
-              required 
-             />
-                        </div>
-                        <div className="mt-5 ml-10">
-                            <Button variant="contained" color="primary" type="submit">
-                                <MdSave className="mr-2" /> Enregistrer
-                            </Button>
-                        </div>
+                        </LocalizationProvider>
+                    </div>
+                    <div className="mt-5 ml-10">
+                        <Button variant="contained" color="primary" type="submit">
+                            <MdSave className="mr-2" /> Enregistrer
+                        </Button>
                     </div>
                 </div>
                 <ToastContainer />

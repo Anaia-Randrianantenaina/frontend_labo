@@ -218,7 +218,7 @@ export default function listeMateriel() {
   // Fonction pour gérer les changements dans les champs du formulaire
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (value.length > 20) {
+    if (value.length > 30) {
 
       setErrors('Le nom du materiel est trop long');
       return;
@@ -703,7 +703,7 @@ export default function listeMateriel() {
             throw new Error('Erreur lors de la modification du personnel');
           }
 
-          const result = await response.json();
+          const result = await response.json();    
           console.log("Materiel modifié :", result);
           setData(filterData.map(materiel => materiel.id === result.id ? result : materiel));
           setShow(!show);
@@ -821,9 +821,9 @@ export default function listeMateriel() {
         <div className="w-full h-[100vh] p-2">
 
           {/* tete */}
-         <div>
-          <Menu/>
-         </div>
+          <div>
+            <Menu/>
+          </div>
 
           {/* tsy kitihina */}
           <div className="w-full h-[2%]"></div>

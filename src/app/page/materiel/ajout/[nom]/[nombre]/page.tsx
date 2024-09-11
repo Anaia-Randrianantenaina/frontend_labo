@@ -13,7 +13,6 @@ import { TextField } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import'react-toastify/dist/ReactToastify.css';
 import context from "antd/es/app/context";
-import Menu from "./menu/page";
 
 export default function listeRessource() {
 
@@ -39,6 +38,7 @@ export default function listeRessource() {
 
   // Definition de l'interface pour les données de l'historique
   interface HistoriqueData {
+    id : number;
     date: Date;
     description: string;
     action: string;
@@ -51,6 +51,7 @@ export default function listeRessource() {
   // Formes pour les historiques
   let isa = historique.nombre;
   let izy = isa - 1;
+  
 
   
   useEffect(() => {
@@ -217,12 +218,32 @@ export default function listeRessource() {
     });
   };
 
+  const [errors, setErrors] = useState('');
+  // Fonction pour gérer les changements dans les champs du formulaire
+  const handleInputChange1 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    if (value && parseFloat(value) < 0) {
+      setErrors('Les chiffres négatifs ne sont pas autorisés.');
+      return;
+    }
+
+    if (!/^\d*$/.test(value)) {
+      setErrors('Veuillez saisir seulement des chiffres.');
+      return false; // Validation échouée
+    }
+
+    setErrors('');
+    setFormValues({
+      ...formValues,
+      [name]: value
+    });
+  };
 
 
 
 
-  const handleClick = () => {
-
+  const handleClick = async (e: React.FormEvent<HTMLFormElement>) => {
     if (total === 0) {
       Swal.fire({
         title: 'VOUS ETES SUR?',
@@ -233,9 +254,21 @@ export default function listeRessource() {
         cancelButtonColor: '#d33',
         cancelButtonText: 'Retour',
         confirmButtonText: 'Oui, Annuler'
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.isConfirmed) {
-          window.location.href = '../../liste'
+          try {
+            const response = await fetch(`http://localhost:3001/historique/supprimer/${historique.id}`, {
+              method: 'DELETE',
+            });
+            if (response.ok) {
+             
+               window.location.href = '../../liste'
+            }
+            
+          } catch (error) {
+            
+          }
+        
         }
       });
     }
@@ -265,9 +298,15 @@ export default function listeRessource() {
         <div className="w-full h-[100vh] p-2">
 
           {/* tete */}
-         <div>
-          <Menu/>
-         </div>
+          <div className="w-full h-[9%] shadow-md  border-gray-200 rounded">
+
+            <p className="text-[15px]v pt-5 text-center"> NOUVEAUX MATERIELS
+              <button className=" fixed mx-[20%]"><BiMessageAltError /></button>
+              <button className=" fixed mx-[22%]"><IoMdNotificationsOutline /></button>
+              <button className="fixed mx-[24%]"><AiOutlineUser /></button>
+              <button className="fixed mx-[26%] font-medium">  Utilisateur  </button></p>
+
+          </div>
 
           {/* tsy kitihina */}
           <div className="w-full h-[2%]"></div>
@@ -284,7 +323,7 @@ export default function listeRessource() {
               </div>
               <button className="bg-none ml-[82%] mt-5 px-5 text-[20px]  rounded text-white fixed" >
                 <Image
-                  onClick={handleClick}
+                  onClick={() => handleClick(maxId)}
                   className=""
                   src="/pic/delete_48px.png "
                   alt="Next.js Logo"
@@ -320,10 +359,20 @@ export default function listeRessource() {
                         <TextField  className=" mb-3 " label="Provenance" value={formValues.provenance} onChange={handleInputChange} name="provenance" variant="outlined" />
                         </div>
                         <div className="flex justify-center items-center w-[100%]">
-                        <TextField type="number" required  className=" mb-3 " value={formValues.prix} onChange={handleInputChange} name="prix" label="Prix Unitaire en Ariary" variant="outlined" />
+                        <TextField  required  className=" mb-3 " value={formValues.prix} onChange={handleInputChange1} name="prix" label="Prix Unitaire en Ariary" variant="outlined" />
                         </div>
                       </div>
-
+                      {errors && (
+                    <div id="errorTooltip" className="bg-none text-red-600 flex text-xs ml-10 pt-2 px-3 fixed">
+                      <Image
+                        className="mx-2"
+                        src="/pic/high_priority_26px.png"
+                        alt="Next.js Logo"
+                        width={20}
+                        height={10}
+                      />  {errors}
+                    </div>
+                  )}
                       <div className="flex justify-center items-center">
                         <button type="submit" className=" mt-[5%]  bg-green-600 px-5 py-1 rounded text-white font-medium">  Confirmer </button>
                         <button type="reset" className=" mt-[5%] ml-[5%] bg-red-600 px-5 py-1 rounded text-white font-medium"> Annuler </button>

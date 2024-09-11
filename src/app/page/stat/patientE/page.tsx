@@ -91,7 +91,7 @@ export default function PatientE() {
 
         setDataE(result);
       }catch (error) {
-        console.error("Erreurlors de la récupérations des données :", error);
+        console.error("Erreur lors de la récupérations des données :", error);
       }
     };
     fetchData()

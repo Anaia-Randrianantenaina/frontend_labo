@@ -10,6 +10,7 @@ import { FaUserCircle } from "react-icons/fa";
 import dynamic from "next/dynamic";
 import Swal from "sweetalert2";
 import { FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Result } from "postcss";
 const DataTable = dynamic(() => import("react-data-table-component"), { ssr: false })
 
 export default function listeMateriel() {
@@ -41,12 +42,35 @@ export default function listeMateriel() {
     });
   };
 
+  // Definition de l'interface pour les données de l'historique
+  interface HistoriqueData {
+    date: Date;
+    description: string;
+    action: string;
+    nombre: number;
+    quantite: string;
+    ajoute: number;
+    commentaire: string;
+  }
+
+  // Formes pour les historiques
+  const [historiqueModif, setHistoriqueModif] = useState({
+    date: null,
+    description: "",
+    action: "",
+    nombre: null,
+    quantite: "",
+    ajoute: null,
+    commentaire: ""
+
+  })
+
   const columns = [
     {
-      name: "DATE",
-      selector: row => row.date,
+      name: "Date",
+      selector: (row: HistoriqueData) => row.date,
       sortable: true,
-      width: "200px",
+      width: "150px",
       cell: row => (
         <div style={{ backgroundColor: '#f0f0f0', padding: '10px' }}>
           {row.date}
@@ -55,57 +79,119 @@ export default function listeMateriel() {
     },
     {
       name: "ID du MATERIEL / RESSOURCE",
-      selector: row => row.id,
+      selector: (row: HistoriqueData) => row.description,
       sortable: true,
       width: "400px",
     },
     {
       name: "Evènement",
-      selector: row => row.ev,
+      selector: (row: HistoriqueData) => row.action,
       sortable: true,
       width: "200px"
     },
     {
-      name: "ETAT ",
-      selector: row => row.etat,
+      name: "Nbr",
+      selector: (row: HistoriqueData) => row.nombre,
       sortable: true,
-      width: "150px"
+      width: "90px"
     },
     {
-      name: "QUANTITE ",
-      selector: row => row.qt,
+      name: "Commentaire ",
+      selector: (row: HistoriqueData) => row.commentaire,
       sortable: true,
-      width: "150px"
+    
     },
     {
-      name: "ACTION",
-      selector: row => row.action,
+      name: "Quantite ",
+      selector: (row: HistoriqueData) => row.quantite,
       sortable: true,
-      width: "100px"
+      width: "200px"
     },
   ]
-  const data = [
-    {
-      date: "12/01/2010", id: "Microscope_1", ev: "Ajout", etat: "Bonne", qt: "Aucun(e) ",
-      action: <button className="cursor-pointers opacity-0.5" >
-        <Image
-          onClick={() => tog(id)}
-          className=""
-          src="/pic/eye_30px.png"
-          alt="Next.js Logo"
-          width={22}
-          height={30}
-        />
-      </button>
+
+  // const data = [
+  //   {
+  //     date: "12/01/2010", id: "Microscope_1", ev: "Ajout", etat: "Bonne", qt: "Aucun(e) ",
+  //     action: <button className="cursor-pointers opacity-0.5" >
+  //       <Image
+  //         onClick={() => tog(id)}
+  //         className=""
+  //         src="/pic/eye_30px.png"
+  //         alt="Next.js Logo"
+  //         width={22}
+  //         height={30}
+  //       />
+  //     </button>
+  //   }
+  // ]
+
+  // États pour stocker les données, les états de chargement, et la visibilité des modaux
+  const [data, setData] = useState<HistoriqueData[]>([]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [date_1, setDate_1] = useState("");
+  const [date_2, setDate_2] = useState("");
+
+  const filterData = data.filter(row => {
+    return (
+      row.description.toLowerCase().includes(searchTerm.toLowerCase())  // Terme de recherche 1 pour le nom
+      // new Date(row.date) > new Date(date_1) &&  // Terme de recherche 2 pour l'unité
+      // new Date(row.date) < new Date(date_1)  // Terme de recherche 3 pour la date de prescription
+    );
+  });
+
+
+
+//   const recherche1 = () =>{
+//     setData( data.filter(historique => {
+//   return (historique.description.toLocaleLowerCase().includes(searchTerm) &&
+//     (new Date(historique.date) > new Date(date_1)) &&
+//     (new Date(historique.date) < new Date(date_2))
+//   )
+// }))
+// }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  }
+
+  const handleDate_1 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDate_1(e.target.value.toLowerCase());
+  }
+
+  const handleDate_2 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDate_2(e.target.value.toLowerCase());
+  }
+
+  
+
+
+
+  // Affichage des listes des materiels: 
+  const fetchData = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/historique/liste');
+
+      if (!response.ok) {
+        throw new Error('Erreur réseau');
+      }
+
+      const result = await response.json();
+      console.log("Données récupérées :", result);
+      setData(result);
+
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données :", error);
     }
-  ]
+  };
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
+    fetchData();
     setIsClient(true);
     setTimeout(() => {
       setLoading(false);
-  }, 2000); // Délai de 2 secondes pour simuler le chargement des données
+    }, 2000); // Délai de 2 secondes pour simuler le chargement des données
   }, [])
 
   //Pagination
@@ -188,7 +274,7 @@ export default function listeMateriel() {
               {loading ? (
                 <LoadingSpinner />
               ) : (
-                <div  className="mx-[5%] py-2 px-2 w-[90%] mt-4 h-[65%] rounded border-gray-50">
+                <div className="mx-[5%] py-2 px-2 w-[90%] mt-4 h-[65%] rounded border-gray-50">
                   {
                     isClient && (
                       <div>
@@ -196,16 +282,24 @@ export default function listeMateriel() {
                           <button className="w-[100%]  py-2 text-center rounded-sm bg-green-700 text-white"> HISTORIQUE PERSONNALISEE </button>
                         </div>
                         <div className="flex justify-center items-center my-2">
-                          <TextField required className="mx-[5%] my-[1%] w-[40%]" label="Nom du Materiel/Ressource" variant="outlined" />
+                         
+                            <TextField required className="mx-[5%] my-[1%] w-[40%] z-0" label="Nom du Materiel/Ressource" name="searchTerm" value={searchTerm} onChange={handleSearchChange} variant="outlined" />
 
-                          <TextField type="date" required className="mx-[5%] my-[1%] w-[30%]" variant="outlined" />
+                            {/* <TextField type="date" required name="date_1" value={date_1} onChange={handleDate_1} variant="outlined" className="mx-[5%] my-[1%] w-[30%]" />
 
-                          <label>Au</label>
+                            <label>Au</label>
 
-                          <TextField type="date" required className="mx-[5%] my-[1%] w-[30%]" variant="outlined" />
+                            <TextField type="date" required className="mx-[5%] my-[1%] w-[30%]" name="date_2" value={date_2} onChange={handleDate_2} variant="outlined" /> */}
 
-                          <button className="border-blue-600 border text-center w-[12%] py-2 rounded text-white bg-blue-600 mr-[5%] "> Afficher </button>
+                            {/* <button onClick={() => recherche()}  className="border-blue-600 border text-center w-[12%] py-2 rounded text-white bg-blue-600 mr-[5%] "> Afficher </button>
 
+                            <button onClick={() => recherche1()}  className="border-gray-600 border text-center flex justify-center w-[12%] py-2 rounded text-white bg-gray-600 mr-[2%] ">  <Image
+                    className="mx-4"
+                    src="/pic/refresh_24px.png"
+                    alt="Next.js Logo"
+                    width={20}
+                    height={30}
+                  /> </button> */}
 
                         </div>
                       </div>
@@ -221,7 +315,7 @@ export default function listeMateriel() {
                 isClient && (
                   <DataTable
                     columns={columns}
-                    data={data}
+                    data={searchTerm ? filterData : data}
                     pagination
                     paginationPerPage={5}
                     paginationRowsPerPageOptions={[5]}
