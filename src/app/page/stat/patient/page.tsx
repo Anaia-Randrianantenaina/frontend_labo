@@ -3,7 +3,7 @@ import { BiListOl } from "react-icons/bi";
 import React, { useEffect, useState } from "react";
 import Navbar from "@/app/navbar/navbar";
 import Menu from "../menu/page";
-import { FaArrowRight, FaBaby, FaBrain, FaCalculator, FaEye, FaFirstAid, FaHeartbeat, FaMicroscope, FaStethoscope, FaUser } from "react-icons/fa";
+import { FaArrowRight, FaBaby, FaBrain, FaEye, FaFirstAid, FaHeartbeat, FaMicroscope, FaStethoscope, FaUser } from "react-icons/fa";
 import DataTable from 'react-data-table-component';
 import { GiScalpel } from "react-icons/gi";
 import {  Bar, Line, Pie, Radar } from 'react-chartjs-2';
@@ -87,7 +87,6 @@ export default function Patient() {
 
   const [openH, setOpenH] = useState(false);
   const [openE, setOpenE] = useState(false);
-  const [tabE, setTabE] = useState(false);
   const [tabH, setTabH] = useState(false);
 
   const openModalH = () => setOpenH(true);
@@ -96,8 +95,7 @@ export default function Patient() {
   const closeModalE = () => setOpenE(false);
   const openTabH = () => setTabH(true);
   const closeTabH = () => setTabH(false);
-  const openTabE = () => setTabE(true);
-  const closeTabE = () => setTabE(false)
+
 
   // Définition des colones pour les tableau
   const columnsH = [
@@ -266,7 +264,7 @@ const barOptions = {
     },
   },
 };
-
+// GRAPHE SEXE
 const areaData = {
   labels: ['Homme', 'Femme'],
   datasets: [
