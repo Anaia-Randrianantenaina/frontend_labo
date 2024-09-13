@@ -14,6 +14,7 @@ import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import LocaleProvider from "antd/es/locale";
 import { DatePicker } from "antd";
+import Menu from "../menu/page";
 
 export default function listeRessource() {
     // Composant de chargement personnalisé
@@ -102,36 +103,25 @@ export default function listeRessource() {
     const [ident,setIdent] = useState("")
 
     const [formValues, setFormValues] = useState({
-        presentation : "",
-
+        presentation: "",
         designation: "",
-
         forme: "pièce",
-
         dosage_forme: 1,
-
         unite_dosage: "",
-
         unite: "",
-
         contenu: null,
-
         prix: null,
-
         date_prescription: null,
-
         numero_lot: null,
-
         quantite: 0,
-
         unite_mesure: "pièce",
-
         dosage: 1,
-
-        utilise : 0
+        utilise: 0,
+        date_ajout: null, // Ajout de date_ajout ici
     });
-
-    let [plus,setPlus] = useState(0);  
+    
+    let [plus, setPlus] = useState(0);
+    
     
     // Formes pour les historiques
     const daty = date;
@@ -222,6 +212,15 @@ export default function listeRessource() {
     // Fonction d'ajout des nouveaux ressources : 
     const ajoutRessource = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+       // Obtenir la date actuelle au format YYYY-MM-DD
+    const today = new Date();
+    const dateOnly = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+    // Ajouter la date actuelle à formValues
+    const formDataWithDate = {
+        ...formValues,
+        date_ajout: dateOnly, // Ajouter la date d'ajout sans l'heure
+    };
         try {
             const response = await fetch('http://localhost:3001/intrant/ajout',
                 {
@@ -229,45 +228,32 @@ export default function listeRessource() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formValues),
+                    body: JSON.stringify(formDataWithDate),
                 });
 
             const result = await response.json();
 
             if (response.ok) {
-                console.log("Ressource ajoutée:", result);
+                console.log("Ressource ajoutée avec succès:", result);
                 setData([...data, result]);
                 aseho();
                 setFormValues({
-                    presentation : "",
-
+                    presentation: "",
                     designation: "",
-
                     forme: "pièce",
-
                     dosage_forme: 1,
-
                     unite_dosage: "",
-
                     unite: "",
-
                     contenu: null,
-
                     prix: null,
-
                     date_prescription: null,
-
                     numero_lot: null,
-
                     quantite: 0,
-
                     unite_mesure: "pièce",
-
                     dosage: 1,
-
-                    utilise : 0
+                    utilise: 0,
+                    date_ajout: null, // Réinitialiser date_ajout
                 });
-                
 
                 e.preventDefault();
                 try {
@@ -291,35 +277,7 @@ export default function listeRessource() {
                 // Si le succès n'est pas true
                 console.error("Erreur lors de l'ajout de la ressource : ", result.message);
                 asehoErreur();
-                // setFormValues({
-                //     presentation: "",
-
-                //     designation: "",
-
-                //     forme: "pièce",
-
-                //     dosage_forme: 1,
-
-                //     unite_dosage: "",
-
-                //     unite: "",
-
-                //     contenu: null,
-
-                //     prix: null,
-
-                //     date_prescription: null,
-
-                //     numero_lot: null,
-
-                //     quantite: null,
-
-                //     unite_mesure: "pièce",
-
-                //     dosage: 1,
-
-                //     utilise : 0
-                // });
+              
             }
         }
         catch (error) {
@@ -342,15 +300,7 @@ export default function listeRessource() {
                 body: JSON.stringify(formValues),
               });
     
-            //   if (!response.ok) {
-            //     throw new Error('Erreur lors de la modification du personnel');
-            //   }
-            //   else{
-            //     const result = await response.json();    
-            //   console.log("Materiel modifié :", result);
-            //   setData(filterData.map(ressource => ressource.id === result.id ? result : ressource));
-             
-            //   }
+         
                setShow1(!show1);
         } catch (error) {
             
@@ -709,13 +659,8 @@ export default function listeRessource() {
                 <Navbar />
                 <div className="w-full h-[100vh] p-2">
 
-                <div className="w-full h-[9%] shadow-md  border border-gray-100 rounded">
-                        <p className="text-[15px] p-5 text-center"> LISTES DES MATERIELS ET RESSOURCES
-                            <button className=" fixed mx-[20%]"><BiMessageAltError /></button>
-                            <button className=" fixed mx-[22%]"><IoMdNotificationsOutline /></button>
-                            <button className="fixed mx-[24%]"><AiOutlineUser /></button>
-                            <button className="fixed mx-[26%] font-medium">  Utilisateur  </button></p>
-                    </div>
+              
+                    <div><Menu/></div>
                     {/* tsy kitihina */}
                     <div className="w-full h-[2%]"></div>
                     <div className="w-full h-[89%] shadow-md border border-gray-50 rounded">

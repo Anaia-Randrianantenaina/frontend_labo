@@ -11,6 +11,7 @@ import dynamic from "next/dynamic";
 import Swal from "sweetalert2";
 import { FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { Result } from "postcss";
+import Menu from "../menu/page";
 const DataTable = dynamic(() => import("react-data-table-component"), { ssr: false })
 
 export default function listeMateriel() {
@@ -242,13 +243,7 @@ export default function listeMateriel() {
         <Navbar />
         <div className="w-full h-[100vh] p-2">
 
-          <div className="w-full h-[9%] shadow-md  border border-gray-100 rounded">
-            <p className="text-[15px] pt-5 text-center"> HISTORIQUE DES MATERIELS ET RESSOURCES
-              <button className=" fixed mx-[20%]"><BiMessageAltError /></button>
-              <button className=" fixed mx-[22%]"><IoMdNotificationsOutline /></button>
-              <button className="fixed mx-[24%]"><AiOutlineUser /></button>
-              <button className="fixed mx-[26%] font-medium">  Utilisateur  </button></p>
-          </div>
+         <div><Menu/></div>
           <div className="w-full h-[2%]"></div>
 
           <div className="w-full h-[85%] shadow-md rounded">

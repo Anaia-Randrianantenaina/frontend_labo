@@ -69,6 +69,7 @@ export default function Materiel() {
         },
     ];
 
+    // AFFICHER LA LISTE DES MATÉRIELS
     const fetchData = async () => {
         try {
             const response = await fetch('http://localhost:3001/materiel/liste');
@@ -290,7 +291,7 @@ export default function Materiel() {
         {/* Champ de dates */}
         <div className="flex ml-2 space-x-8">
   <input
-    type="date"
+    type="date" 
     value={startDate}
     onChange={(e) => setStartDate(e.target.value)}
     className="border border-gray-300 rounded-lg px-6 py-3 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-transform duration-300 ease-in-out bg-white shadow-lg hover:shadow-2xl placeholder-gray-400 text-gray-800 placeholder-opacity-70"
@@ -303,15 +304,21 @@ export default function Materiel() {
     className="border border-gray-300 rounded-lg px-6 py-3 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-transform duration-300 ease-in-out bg-white shadow-lg hover:shadow-2xl placeholder-gray-400 text-gray-800 placeholder-opacity-70"
     placeholder="End Date"
   />
-</div>
+        </div>
 
 
          {/* Titre centré */}
          <h2 className="text-center font-bold text-xl mx-auto">Statistique générale des matériels</h2>
 
          {/* Espacement pour l'alignement */}
-          <div className="w-1/4"></div>
-       </div>
+         <div className="mr-5">
+    <button className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 
+    transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" onClick={openRapport}>
+        Rapport Analytiques
+    </button>
+</div>
+
+                </div>
 
                     
                     <div className="flex justify-between mt-3">
@@ -450,28 +457,78 @@ export default function Materiel() {
             </div>
 
             {rapportM && (
-                            <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-                                <div className="bg-white rounded-lg shadow-lg p-6 w-[80%] h-[60%] overflow-auto">
-                                    <h2 className="text-2xl text-center font-bold mb-4">Détails des Matériels</h2>
-                                    <DataTable
-                                        columns={columns}
-                                        data={filteredData}
-                                        pagination
-                                        paginationPerPage={5}
-                                        paginationRowsPerPageOptions={[5]}
-                                    />
-                                    <div className="flex justify-end gap-4 mt-4">
-                                        <button className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800" onClick={() => window.print()}>
-                                            Imprimer
-                                        </button>
-                                        <button className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800" >
-                                            Fermer
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-          
+  <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg p-6 w-[210mm] h-[297mm] overflow-hidden print:w-[210mm] print:h-[297mm]">
+
+      <div className="mb-6">
+      <h3 className="text-lg font-semibold text-center">CHU TAMBOHOBE FIANARANTSOA</h3>
+      <h3 className="text-lg font-bold text-center">SERVICE LABORATOIRE</h3>
+      <h3 className="text-lg text-center mb-4">Rapport d'Activités de Laboratoire</h3>
+        <h3 className="text-center font-bold text-2xl mb-4 text-gray-900">Nombre de chaque matériel</h3>
+        <ul className="list-disc pl-5 space-y-2">
+          {Object.entries(materielCounts).map(([materiel, count]) => (
+            <li key={materiel} className="text-lg text-gray-800 flex justify-between items-center">
+              <span>{materiel} :</span>
+              <span className="font-semibold">{count}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mb-6">
+        <h3 className="text-center font-bold text-2xl mb-4 text-gray-900">État des Matériels</h3>
+          <div className="flex space-x-[520px]">
+            <div><p>Matériels en bonne états :</p></div>
+            <div><p>{filteredBonne}</p></div>
+          </div>
+          <div className="flex space-x-[520px]">
+            <div><p>Matériels en états moyen :</p></div>
+            <div><p>{filteredMoyen}</p></div>
+          </div>
+          <div className="flex space-x-[510px]">
+            <div><p>Matériels en mauvais états :</p></div>
+            <div><p>{filteredMauvais}</p></div>
+          </div>
+      </div>
+
+      <div>
+        <h3 className="text-center font-bold text-2xl mb-4 text-gray-900">Prix des Matériels : {filteredTotalPrice.toFixed(2)}Ariary</h3>
+        <div className="flex flex-col space-y-4">
+          {Object.entries(prixByMat(filteredData)).map(([prix, materiels]) => (
+            <div key={prix} className="flex flex-col space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-[15px]"><u>{prix} Ar:</u></span>
+                <div className="flex-grow"></div>
+              </div>
+              <p className="list-disc pl-5 space-y-1">
+                {materiels.map(materiel => (
+                  <li key={materiel} className="text-[15px]  text-right">{materiel}</li>
+                ))}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-4 mt-4 print:hidden">
+        <button
+          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
+          onClick={() => window.print()}
+        >
+          Imprimer
+        </button>
+
+        <button
+          className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800"
+          onClick={closeRapport}
+        >
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
         </div>
     );
 }

@@ -86,6 +86,12 @@ export default function Menu () {
     window.location.href = "/page/stat/materiel/";
   };
 
+  const [showRes, setShowRes] = useState(false);
+  const statRes = (id: number) => {
+    setShowRes(!showRes);
+    window.location.href = "/page/stat/resource/";
+  }
+
   const [showPerso, setShowPerso] = useState(false);
   const statPerso = (id: number) => {
     setShowPerso(!showTest);
@@ -93,9 +99,14 @@ export default function Menu () {
   };
 
   const [isOpen1, setIsOpen1] = useState(false);
+  const [matOpen, setMatOpen] = useState(false);
 
   const toogleMenu1 = () => {
     setIsOpen1(!isOpen1);
+  }
+
+  const toggleMenu2 = () => {
+    setMatOpen(!matOpen);
   }
 
   const columns = [
@@ -144,7 +155,8 @@ export default function Menu () {
                     <h1><u>Tests</u></h1>
                  </div>
                   </button>
-                  <button onClick={() => statMat(1)}>
+                  {/* <button onClick={() => statMat(1)}> */}
+                  <button onClick={toggleMenu2}>
                      <div className="flex items-center space-x-2 bg-gray-200 p-2 rounded-md">
                       <FaBox className="text-lg" />
                       <h1><u>Matériels</u></h1>
@@ -210,6 +222,13 @@ export default function Menu () {
         </div>
       )}
 
+      {showRes && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            {/* Spinner Animation */}
+            <div className="spinner border-t-4 border-blue-500 border-solid rounded-full w-16 h-16 animate-spin"></div>
+        </div>
+      )}
+
         {showPerso && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             {/* Spinner Animation */}
@@ -234,6 +253,25 @@ export default function Menu () {
           
         )
       }
+      {
+        matOpen && (
+          <ul className="absolute left-0 justify-center ml-[330px] mt-2 w-30 bg-white shadow-lg rounded-3xl z-50 border border-gray-200">
+             <li className="hover:bg-gray-100">
+            <button onClick={() => statMat(1)}>
+              <span className="block py-2 px-4 font-bold text-center text-gray-800 hover:text-green-600">Matériels</span>
+            </button>
+            </li>
+            <li className="hover:bg-gray-100">
+            <button onClick={() => statRes(1)}>
+              <span className="block py-2 px-4 font-bold text-center text-gray-800 hover:text-green-600">Intrants</span>
+            </button>
+            </li>
+          </ul>
+          
+        )
+      }
+
+      
 
 {isNotificationOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
