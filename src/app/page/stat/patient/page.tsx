@@ -7,15 +7,16 @@ import { FaArrowRight, FaBaby, FaBrain, FaEye, FaFirstAid, FaHeartbeat, FaMicros
 import DataTable from 'react-data-table-component';
 import { GiScalpel } from "react-icons/gi";
 import {  Bar, Line, Pie, Radar } from 'react-chartjs-2';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement, ArcElement } from 'chart.js';
 
 // Enregistrer les composants nécessaires
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement,BarElement,ArcElement, Title, Tooltip, Legend);
 
-
-
 export default function Patient() {
-
   // Definition de l'interface pour les données des personnels
   interface HospitaliseData {
     id: number; 
@@ -28,41 +29,31 @@ export default function Patient() {
     service: string;
     date_ajout: string;
   }
-
   interface ServiceData {
     pole: string;
     service: string;
     nombre: number;
   }
+  const [openE, setOpenE] = useState(false);
+  const [tabH, setTabH] = useState(false);
+  const [rapport, setRapport] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const openModalE = () => setOpenE(true);
+  const closeModalE = () => setOpenE(false);
+  const openTabH = () => setTabH(true);
+  const closeTabH = () => setTabH(false);
+  const openRap = () => setRapport(true);
+  const closeRap = () => setRapport(false);
+   const [mois, setMois] = useState(''); // État pour stocker le mois
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   const columns = [
-    {
-      name: 'Pôle',
-      selector: (row: ServiceData) => row.pole,
-      sortable: true,
-      cell: (row : ServiceData) => <span className="font-semibold text-[20px]">{row.pole}</span>,  // Ajout de style pour chaque pôle
-    },
-    {
-      name: 'Service',
-      selector: (row: ServiceData)=> row.service,
-      sortable: true,
-      cell: (row : ServiceData) => <span className="text-[20px]">{row.service}</span>,  
-    },
-    {
-      name: 'Nombre de Patients',
-      selector: (row: ServiceData) => row.nombre,
-      sortable: true,
-      right: true,
-      cell: (row : ServiceData) => <span className="text-[20px]">{row.nombre}</span>,
-    },
+    { name: 'Pôle', selector: (row: ServiceData) => row.pole, sortable: true, cell: (row : ServiceData) => <span className="font-semibold text-[20px]">{row.pole}</span>, },
+    { name: 'Service', selector: (row: ServiceData)=> row.service, sortable: true, cell: (row : ServiceData) => <span className="text-[20px]">{row.service}</span>,  },
+    { name: 'Nombre de Patients', selector: (row: ServiceData) => row.nombre, sortable: true, right: true, cell: (row : ServiceData) => <span className="text-[20px]">{row.nombre}</span>,},
   ];
-  
- 
-  
-
-
-  const [hospitaliseData, setDataH] = useState<HospitaliseData[]>([]);
-
+    const [hospitaliseData, setDataH] = useState<HospitaliseData[]>([]);
   // Fonction pour récuperer les données des patients depuis le serveur 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,91 +73,65 @@ export default function Patient() {
       } 
     };
     fetchData()
-  }, [hospitaliseData]);
+  }, []);
 
+   // FONCTION POUR AFFICHER LES DONNÉES SELON LES DATE SELECTIONNER
+   const convertToISO = (dateString: string) => {
+    const [day, month, year] = dateString.split("-");
+    return `${year}-${month}-${day}`;
+  };
 
-  const [openH, setOpenH] = useState(false);
-  const [openE, setOpenE] = useState(false);
-  const [tabH, setTabH] = useState(false);
+  const filterByDate = (data: HospitaliseData[]) => {
+    if (!startDate || !endDate) return data;
 
-  const openModalH = () => setOpenH(true);
-  const closeModalH = () => setOpenH(false);
-  const openModalE = () => setOpenE(true);
-  const closeModalE = () => setOpenE(false);
-  const openTabH = () => setTabH(true);
-  const closeTabH = () => setTabH(false);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
+    return data.filter((hospitalise) => {
+      const isoDate = convertToISO(hospitalise.date_ajout);
+      const dateArriver = new Date(isoDate);
 
+      return dateArriver >= start && dateArriver <= end;
+    });
+  };
+
+  const filteredData = filterByDate(hospitaliseData);
   // Définition des colones pour les tableau
   const columnsH = [
-    {
-      name: 'Numéro',
-      selector: (row: HospitaliseData) => row.num+"H",
-      sortable: true,
-    },
-    {
-      name: 'Nom',
-      selector: (row: HospitaliseData) => row.nom,
-      sortable: true,
-    },
-    {
-      name: 'Prénom',
-      selector: (row: HospitaliseData) => row.prenom,
-      sortable: true,
-    },
-    {
-      name: 'Sexe',
-      selector: (row: HospitaliseData) => row.sexe,
-      sortable: true,
-    },
-    {
-      name: 'Date de Naissance',
-      selector: (row: HospitaliseData) => row.date_naiss,
-      sortable: true,
-    },
-    {
-      name: 'Age',
-      selector: (row: HospitaliseData) => row.age,
-      sortable: true,
-    },
-    {
-      name: 'Service',
-      selector: (row: HospitaliseData) => row.service,
-      sortable: true,
-    },
-    {
-      name: "Date d'Ajout",
-      selector: (row: HospitaliseData) => row.date_ajout,
-      sortable: true,
-    },
+    { name: 'Numéro', selector: (row: HospitaliseData) => row.num+"H", sortable: true, },
+    { name: 'Nom', selector: (row: HospitaliseData) => row.nom, sortable: true,},
+    { name: 'Prénom', selector: (row: HospitaliseData) => row.prenom, sortable: true,},
+    { name: 'Sexe', selector: (row: HospitaliseData) => row.sexe, sortable: true,},
+    { name: 'Date de Naissance', selector: (row: HospitaliseData) => row.date_naiss, sortable: true},
+    { name: 'Age', selector: (row: HospitaliseData) => row.age, sortable: true, },
+    { name: 'Service', selector: (row: HospitaliseData) => row.service, sortable: true,},
+    { name: "Date d'Ajout", selector: (row: HospitaliseData) => row.date_ajout, sortable: true },
   ]
-
- 
-
+  
   // CALCUL DU NOMBRE DE PATIENT HOSPITALISE 
-  const totalPatientH = hospitaliseData.length;
+  const totalPatientH = filteredData.length;
   // NOMBRE DE PATIENT PAR SEXE
-  const Homme = hospitaliseData.filter(hospitalise => hospitalise.sexe === 'M').length;
-  const Femme = hospitaliseData.filter(hospitalise => hospitalise.sexe === 'F').length;
+  const Homme = filteredData.filter(hospitalise => hospitalise.sexe === 'M').length;
+  const Femme = filteredData.filter(hospitalise => hospitalise.sexe === 'F').length;
   // NOMBRE DE PATIENT PAR SERVICE
-  const Orthopedie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Orthopédie').length;
-  const Chirurgie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Chirurgie').length;
-  const Bloc = hospitaliseData.filter(hospitalise => hospitalise.service === 'Bloc').length;
-  const Opthamologie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Ophtamologie').length;
-  const Interne = hospitaliseData.filter(hospitalise => hospitalise.service === 'Interne').length;
-  const Cardiologie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Cardiologie').length;
-  const Pneumologie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Pneumologie').length;
-  const Infectueuse = hospitaliseData.filter(hospitalise => hospitalise.service === 'Infectieuse').length;
-  const Oncologie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Oncologie').length;
-  const Psychiatrie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Psychiatrie').length;
-  const Appareillage = hospitaliseData.filter(hospitalise => hospitalise.service === 'Appareillage').length;
-  const Gynécologie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Gynécologie').length;
-  const Pédiatrie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Pédiatrie').length;
-  const Néonaltologie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Néonatologie').length;
-  const Réanimation = hospitaliseData.filter(hospitalise => hospitalise.service === 'Réanimation').length;
-  const Triage = hospitaliseData.filter(hospitalise => hospitalise.service === 'Triage').length;
-  const Imagérie = hospitaliseData.filter(hospitalise => hospitalise.service === 'Imagerie').length;
-  const CRTS = hospitaliseData.filter(hospitalise => hospitalise.service === 'CRTS').length;
+  const Orthopedie = filteredData.filter(hospitalise => hospitalise.service === 'Orthopédie').length;
+  const Chirurgie = filteredData.filter(hospitalise => hospitalise.service === 'Chirurgie').length;
+  const Bloc = filteredData.filter(hospitalise => hospitalise.service === 'Bloc').length;
+  const Opthamologie = filteredData.filter(hospitalise => hospitalise.service === 'Ophtamologie').length;
+  const Interne = filteredData.filter(hospitalise => hospitalise.service === 'Interne').length;
+  const Cardiologie = filteredData.filter(hospitalise => hospitalise.service === 'Cardiologie').length;
+  const Pneumologie = filteredData.filter(hospitalise => hospitalise.service === 'Pneumologie').length;
+  const Infectueuse = filteredData.filter(hospitalise => hospitalise.service === 'Infectieuse').length;
+  const Oncologie = filteredData.filter(hospitalise => hospitalise.service === 'Oncologie').length;
+  const Psychiatrie = filteredData.filter(hospitalise => hospitalise.service === 'Psychiatrie').length;
+  const Appareillage = filteredData.filter(hospitalise => hospitalise.service === 'Appareillage').length;
+  const Gynécologie = filteredData.filter(hospitalise => hospitalise.service === 'Gynécologie').length;
+  const Pédiatrie = filteredData.filter(hospitalise => hospitalise.service === 'Pédiatrie').length;
+  const Néonaltologie = filteredData.filter(hospitalise => hospitalise.service === 'Néonatologie').length;
+  const Réanimation = filteredData.filter(hospitalise => hospitalise.service === 'Réanimation').length;
+  const Triage = filteredData.filter(hospitalise => hospitalise.service === 'Triage').length;
+  const Imagérie = filteredData.filter(hospitalise => hospitalise.service === 'Imagerie').length;
+  const CRTS = filteredData.filter(hospitalise => hospitalise.service === 'CRTS').length;
   // NOMBRE DE PATIENT PAR GÉNÉRATION
   // Fonction pour obtenir le nombre de patients par tranche d'âge
 // Fonction pour convertir les âges en nombres
@@ -203,7 +168,7 @@ const parseAge = (age: string): number => {
     return ageGroups;
   };
 
-  const { Enfant, Jeune, Adulte, Vieux } = getPatientCountsByAge(hospitaliseData);
+  const { Enfant, Jeune, Adulte, Vieux } = getPatientCountsByAge(filteredData);
   
 
 
@@ -310,6 +275,66 @@ const ScatterOption = {
   },
 };
 
+// EXPORATATION DES DONNÉES EN EXCEL
+const exportToExcel = (data: any[], columns: any[], filename: string) => {
+  const worksheet = XLSX.utils.json_to_sheet(data, { header: columns.map(col => col.name) });
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+  const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  saveAs(new Blob([wbout], { type: 'application/octet-stream' }), filename);
+};
+
+// Fonction pour capturer le contenu et générer le PDF
+const saveAsPDF = async () => {
+  setLoading(true);
+  const input = document.getElementById('report-content') as HTMLElement | null; // Typage
+
+  if (!input) {
+      console.error('Element with ID "report-content" not found');
+      alert("Erreur : Le contenu du rapport n'a pas été trouvé.");
+      setLoading(false);
+      return;
+  }
+
+  try {
+      const canvas = await html2canvas(input, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+
+      const pdf = new jsPDF('portrait', 'pt', 'a4');
+      const imgWidth = 595.28;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+      const pdfBlob = pdf.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl);
+
+       // Valeur par défaut pour le contenu
+    const defaultContenu = 'Rapport pour la gestion du patient hospitalisé';
+
+      const formData = new FormData();
+      formData.append('file', pdfBlob, 'personnel_rapport.pdf');
+      formData.append('contenu', defaultContenu); // Ajouter la valeur du contenu ici
+
+
+      const response = await fetch('http://localhost:3001/upload-pdf', {
+          method: 'POST',
+          body: formData,
+      });
+
+      if (response.ok) {
+          console.log('PDF envoyé avec succès au backend');
+      } else {
+          alert('Erreur lors de l\'envoi du PDF. Veuillez réessayer.');
+          console.error('Erreur lors de l\'envoi du PDF');
+      }
+  } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      alert('Une erreur est survenue lors de la génération du PDF.');
+  }
+
+  setLoading(false);
+};
 
 
   
@@ -326,7 +351,35 @@ const ScatterOption = {
           {/* CONTENU PRINCIPALE */}
           <div className="w-full h-[89%] shadow-md bg-gray-200 border border-gray-300 rounded">
 
-            <h1 className="text-center mt-1 font-bold">STATISTIQUES GÉNÉRALE DU GESTION DES PATIENTS</h1>
+          <div className="flex justify-between">
+            <div>
+              <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border border-gray-300 rounded-lg px-6 py-3 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-transform duration-300 ease-in-out bg-white shadow-lg hover:shadow-2xl placeholder-gray-400 text-gray-800"
+              placeholder="Date de début"
+            />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border border-gray-300 rounded-lg px-6 py-3 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-transform duration-300 ease-in-out bg-white shadow-lg hover:shadow-2xl placeholder-gray-400 text-gray-800"
+              placeholder="Date de fin"
+            />
+            </div>
+
+             {/* Titre centré */}
+        <div> <h2 className="text-center font-bold text-xl mx-auto">Statistique générale des patients hospitalisés</h2></div>
+
+          {/* Espacement pour l'alignement */}
+          <div className="mr-5 mt-1">
+          <button className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 
+              transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" onClick={openRap}>
+              Rapport Analytiques
+            </button>
+          </div>
+          </div>
 
             {/* NOMBRE DE PATIENTS */}
             <div className="flex justify-between mt-[-10px]">
@@ -365,16 +418,17 @@ const ScatterOption = {
                   <h2 className="text-2xl text-center font-bold mb-4">Détails des Hospitalisés</h2>
                   <DataTable
                     columns={columnsH}
-                    data={hospitaliseData}
+                    data={filteredData}
                     pagination
                     paginationPerPage={5} // Définit le nombre de lignes par page à 5
                     paginationRowsPerPageOptions={[5]} // Options pour le nombre de lignes par page
                 
                   />
                   <div className="flex justify-end gap-4 mt-4">
-                    <button className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800" onClick={() => window.print()}>
-                      Imprimer
-                    </button>
+                    
+                    <button className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800" onClick={() => exportToExcel(filteredData, columns, 'Liste des patient hospitaliser.xlsx')}>
+                    Exporter en Excel
+                   </button>
                     <button className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800" onClick={closeTabH}>
                       Fermer
                     </button>
@@ -388,7 +442,7 @@ const ScatterOption = {
                 {/* Tableau de bord hosipitalisé */}
             <div className="top-[50px] mx-10 left-[1.5cm] right-[35cm] w-[550px] h-[300px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto">
   <div className="flex items-center justify-center mb-4">
-    <FaUser className="text-green-700 text-[30px] mr-4 animate-bounce" />
+    <FaUser className="text-green-700 text-[30px] mr-4" />
     <h2 className="text-center font-bold text-[30px]">Hospitalisé</h2>
   </div>
   <div className="grid grid-cols-2 gap-4">
@@ -432,61 +486,22 @@ const ScatterOption = {
     </div>
   </div>
   <div className="ml-[180px]">
-  <button
-    className="mt-1 px-4 py-2 border border-green-700 text-green-700 rounded hover:bg-green-50 flex items-center "
-    onClick={openModalH}
-  >
-    <FaEye className="mr-2" /> Voir Détails
-  </button>
+  
   </div>
              </div>
 
-             {openH && (
- <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
- <div className="bg-white rounded-lg shadow-2xl p-8 w-[80%] h-[80%] overflow-auto relative">
-   <h2 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Détails des Hospitalisés</h2>
-   
-   <div className="border-t border-gray-300 my-4"></div>
-
-   <p className="text-lg font-semibold text-gray-700 mb-2">Nombre de patients par service :</p>
-
-
-   <div className="border-t border-gray-300 my-6"></div>
-
-   <div className="flex justify-end gap-4 mt-6 no-print">
-     <button
-       className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
-       onClick={() => window.print()}
-     >
-       Imprimer
-     </button>
-
-     <button
-       className="px-6 py-2 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200"
-       onClick={closeModalH}
-     >
-       Fermer
-     </button>
-   </div>
-
-   <span className="absolute top-4 right-4 text-gray-500 cursor-pointer hover:text-gray-700 transition no-print" onClick={closeModalH}>&times;</span>
- </div>
-</div>
-
-
-
-)}
+            
 
 
              {/* Tableau de bord externe */}
              <div className="top-[50px] mx-10 left-[1.5cm] right-[35cm] w-[550px] h-[300px] bg-slate-50 shadow-lg rounded-3xl z-10 p-4 overflow-auto">
              <div className="flex items-center justify-center mb-6">
-    <FaFirstAid className="text-blue-600 text-[30px] mr-3 animate-bounce" />
-    <h2 className="text-center font-extrabold text-gray-800 text-[26px]">Nombre de patient par service</h2>
+    <FaFirstAid className="text-blue-600 text-[30px] mr-3 " />
+    <h2 className="text-center font-extrabold text-gray-800 text-[26px]">Nombre de patient par pôles</h2>
   </div>
 
   {/* NOMBRE DE PATIENT POUR CHAQUE POLE  */}
-  <div className="grid grid-cols-2 gap-6 text-gray-800 font-medium text-[15px]">
+  <div className="grid grid-cols-2 gap-1 mt-[-15px] text-gray-800 font-medium text-[15px]">
   <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
     <FaHeartbeat className="text-red-500" />
     <p className="hover:text-blue-600">POLE CHIRURGIE : {poleChirurgie} </p>
@@ -509,7 +524,7 @@ const ScatterOption = {
 
   <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
     <GiScalpel className="text-blue-700" />
-    <p className="hover:text-blue-600">POLE ANESTHÉSIE RÉANIMATION URGENCE : {poleAnesthesie}</p>
+    <p className="hover:text-blue-600">POLE RÉANIMATION URGENCE : {poleAnesthesie}</p>
   </div>
 
   <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg shadow-md hover:bg-blue-50 hover:shadow-lg transition duration-300 ease-in-out">
@@ -519,9 +534,9 @@ const ScatterOption = {
 </div>
 
   {/* Bouton Voir Détails */}
-  <div className="flex justify-center mt-6">
+  <div className="flex justify-center mt-3">
     <button
-      className="mt-1 px-5 py-2 bg-green-700 text-white font-medium rounded-lg hover:bg-green-800 flex items-center transition duration-300 transform hover:scale-105"
+      className="mt-1 px-4 py-2 border border-green-700 text-green-700 rounded hover:bg-green-50 flex items-center"
       onClick={openModalE}
     >
       <FaEye className="mr-2" /> Voir Détails
@@ -532,7 +547,7 @@ const ScatterOption = {
              {openE && (
   <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg shadow-lg p-6 w-[80%] h-[80%] overflow-auto">
-      <h2 className="text-2xl font-bold mb-4 text-center">Détails des Services Externes</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Détails du nombre de patients par sevices</h2>
 
       <div className="bg-white p-4 rounded shadow-lg">
         <h3 className="text-lg font-semibold text-center mb-4">Liste des Services</h3>
@@ -551,13 +566,10 @@ const ScatterOption = {
       </div>
 
       <div className="flex justify-end gap-4 mt-4 no-print">
-        <button
-          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
-          onClick={() => window.print()}
-        >
-          Imprimer
-        </button>
-
+        
+      <button className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800" onClick={() => exportToExcel(data, columns, 'Liste des patient hospitaliser.xlsx')}>
+                    Exporter en Excel
+                   </button>
         <button
           className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800"
           onClick={closeModalE}
@@ -596,6 +608,144 @@ const ScatterOption = {
 
 
             </div>
+
+            {rapport && (
+  <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
+    <div
+      id="report-content"
+      className="bg-white rounded-lg shadow-md p-6 w-[210mm] h-[297mm] max-h-[100vh] overflow-auto print:w-[210mm] print:h-[297mm] print:overflow-visible"
+    >
+      <div className="mb-6 text-center">
+        <h3 className="text-lg font-semibold">CHU TAMBOHOBE FIANARANTSOA</h3>
+        <h3 className="text-lg font-bold">SERVICE LABORATOIRE</h3>
+
+        <h3 className="text-md mt-3 mb-1">Rapport d'Activités de Laboratoire:</h3>
+        <h4 className="text-sm font-medium">
+          {startDate && endDate ? `${startDate} au ${endDate}` : "Sélectionnez les dates"}
+        </h4>
+
+        <h3 className="font-bold text-xl mt-4 mb-3">Gestion des patients</h3>
+
+        {/* Nombre total de patients */}
+        <h4 className="font-bold text-md mt-3 mb-1">
+          1. Nombre total de patients :{totalPatientH}
+        </h4>
+
+        {/* Nombre de patients par sexe */}
+        <h4 className="font-bold text-md mt-3 mb-1">2. Nombre de patients par sexe:</h4>
+        <table className="min-w-full border-collapse border border-gray-400 mb-3">
+          <thead>
+            <tr>
+              <th className="border border-gray-300 px-2 py-1 text-left text-sm">Sexe</th>
+              <th className="border border-gray-300 px-2 py-1 text-left text-sm">Nombre de Patients</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Hommes</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{Homme}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Femmes</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{Femme}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Nombre de patients par génération */}
+        <h4 className="font-bold text-md mt-3 mb-1">3. Nombre de patients par génération :</h4>
+        <table className="min-w-full border-collapse border border-gray-400 mb-3">
+          <thead>
+            <tr>
+              <th className="border border-gray-300 px-2 py-1 text-left text-sm">Génération</th>
+              <th className="border border-gray-300 px-2 py-1 text-left text-sm">Nombre de Patients</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Enfants</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{Enfant}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Jeunes</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{Jeune}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Adultes</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{Adulte}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Vieux</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{Vieux}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Tableau pour les pôles */}
+        <h4 className="font-bold text-md mt-3 mb-1">4. Nombre de patients par pôles :</h4>
+        <table className="min-w-full border-collapse border border-gray-400 mb-3">
+          <thead>
+            <tr>
+              <th className="border border-gray-300 px-2 py-1 text-left text-sm">Pôle</th>
+              <th className="border border-gray-300 px-2 py-1 text-left text-sm">Nombre de Patients</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Pôle Chirurgie</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{poleChirurgie}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Pôle Tête et Cou</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{poleTeteCou}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Pôle Médecin</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{poleMedecine}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Pôle Mère Enfant</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{poleMereEnfant}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Pôle Réanimation</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{poleAnesthesie}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-2 py-1 text-sm">Pôle Paraclinique</td>
+              <td className="border border-gray-300 px-2 py-1 text-sm">{poleParaclinique}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Section pour les boutons */}
+      <div className="flex justify-end gap-4 mt-4 print:hidden">
+        <button
+          className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300"
+          onClick={saveAsPDF}
+          disabled={loading}
+        >
+          {loading ? "En cours..." : "Enregistrer en PDF"}
+        </button>
+
+        <button
+          className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition duration-300"
+          onClick={closeRap}
+        >
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+
 
 
           </div>

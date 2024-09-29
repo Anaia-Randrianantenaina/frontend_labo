@@ -1,13 +1,6 @@
-import { GiDrippingTube } from "react-icons/gi";
-import { TbTestPipe2 } from "react-icons/tb";
-import { BiUserCircle } from "react-icons/bi";
-import { IoMdNotifications } from "react-icons/io";
-import { BiCommentError } from "react-icons/bi";
 import React from "react";
 import Navbar from "@/app/navbar/navbar";
-import Link from "next/link";
 import Appbar from "../appbar/appbar";
-import Testeapp from "./testeapp";
 
 const page = () => {
   return (
@@ -22,8 +15,12 @@ const page = () => {
           {/* intouchable */}
           <div className="w-full h-[2%]"></div>
           {/* contenu */}
-          <div className="w-full h-[89%] shadow-md  border border-gray-200 rounded">
-            <Testeapp />
+          <div className="w-full h-[89%] shadow-md  border border-gray-200 rounded flex">
+            <div className="h-full rounde-[55px] w-[50%]"></div>
+            <img
+              src="/Images/testimage.jpeg"
+              className="rounded-full rounded-r-none rounded-t-none"
+            />
           </div>
         </div>
       </div>

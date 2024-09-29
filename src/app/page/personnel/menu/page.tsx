@@ -17,24 +17,21 @@ export default function Menu () {
                    <Link href="/page/stat/patient/">
                     <div className="flex items-center space-x-2 bg-gray-200 p-2 rounded-md">
                    <FaUser className="text-lg" />
-                <h1><u>Patients</u></h1>
+                <h1><u>Personnels</u></h1>
                   </div>
                   </Link>
-                  <Link href="/page/stat/tests/">
-                   <div className="flex items-center space-x-2 bg-gray-200 p-2 rounded-md">
-                  <FaFlask className="text-lg" />
-                    <h1><u>Tests</u></h1>
-        </div>
+                  <Link href="">
+                  
     </Link>
-    <Link href="/page/stat/materiel/">
+    <Link href="">
         <div className="flex items-center space-x-2 bg-gray-200 p-2 rounded-md">
             <FaBox className="text-lg" />
-            <h1><u>Matériels</u></h1>
+            <h1><u>Congés</u></h1>
         </div>
     </Link>
                 </div>
                     <div>
-                        <h1 className="font-bold text-[30px]">TABLEAU DE BORD ET RAPPORT ANALYTIQUE</h1>
+                        <h1 className="font-bold text-[20px]">SUIVI DES PERSONNELS</h1>
                     </div>
 
                     <div className="flex space-x-2 w-[160px] items-center">

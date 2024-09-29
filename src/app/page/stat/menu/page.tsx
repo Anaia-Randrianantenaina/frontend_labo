@@ -2,7 +2,7 @@
 import { IoIosNotifications } from "react-icons/io"; 
 import { AiOutlineUser } from "react-icons/ai"; 
 import React, { useEffect, useState } from "react";
-import { FaBox, FaFlask, FaTrash, FaUser } from "react-icons/fa";
+import { FaBox, FaFlask, FaHistory, FaTrash, FaUser } from "react-icons/fa";
 import DataTable from "react-data-table-component";
 
 
@@ -14,14 +14,25 @@ export default function Menu () {
     message: string;
   }
 
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // État pour le modal de notification
- 
+  interface UploadData {
+    id: number;
+    filePath: string;
+    contenu: string | null;
+  }
+  
+  
 
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // État pour le modal de notification
   const openNotificationModal = () => setIsNotificationOpen(true);
   const closeNotificationModal = () => setIsNotificationOpen(false);
 
+  const [isRapport, setIsRapport] = useState(false);
+  const openRapport = () => setIsRapport(true);
+  const closeRapport = () => setIsRapport(false);
+
   // États pour stocker les données
   const [data, setData] = useState<NotifData[]>([]);
+  const [dataRapport, setDataRapport] = useState<UploadData[]>([]);
 
   // Fonction pour récuperer les données de notifications
   useEffect(() => {
@@ -59,6 +70,26 @@ export default function Menu () {
       console.error("Erreur lors de la suppression de la notification :", error);
     }
   };
+
+  // fonction pour récupérer les données des uploads
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/upload-pdf/pdfs');
+        if (!response.ok) {
+          throw new Error('Erreur réseau');
+        }
+        const result: UploadData[] = await response.json();
+        console.log("Donnée récupérer:", result);
+        setDataRapport(result);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données:", error);
+      }
+    };
+    fetchData();
+  },[dataRapport])
+  
+  
 
   // SPIN ACCEUIL
 
@@ -111,30 +142,41 @@ export default function Menu () {
 
   const columns = [
     {
-      name: '',
-      selector: (row: NotifData) => row.message,
-      sortable: true,
+      name: '', selector: (row: NotifData) => row.message, sortable: true,
     },
     {
       name: '',
       cell: (row: NotifData) => (
         <div className="flex space-x-2">
-            <button
-            className="text-red-500 hover:text-red-700 ml-52"
-            onClick={() => handleDelete(row.id)}
-          >
+            <button className="text-red-500 hover:text-red-700 ml-52"  onClick={() => handleDelete(row.id)}>
             <FaTrash />
           </button>
         </div>
         ),
     }
   ]
+
+  // Définir les colonnes pour le DataTable
+  const columnRapport = [
+    {
+      name: 'ID',
+      selector: (row: UploadData) => row.id.toString(), // Utiliser une fonction pour extraire les valeurs
+      sortable: true,
+    },
+    {
+      name: 'Chemin du Fichier',
+      selector: (row: UploadData) => row.filePath,
+      sortable: true,
+    },
+    {
+      name: 'Contenu',
+      selector: (row: UploadData) => row.contenu ? row.contenu : 'Pas de contenu',
+      sortable: true,
+    },
+  ];
 // NOmbre de notification
   const Notif = data.length;
   
-  
-  
-    
     return (
        
              <div className="w-full h-[9%] shadow-md bg-slate-50 border border-gray-300 rounded">
@@ -169,11 +211,14 @@ export default function Menu () {
                      </div>
                   </button>
                 </div>
-                    <div>
-                        <h1 className="font-bold text-[30px]">TABLEAU DE BORD ET RAPPORT ANALYTIQUE</h1>
+                    <div className="mr-[170px]">
+                        <h1 className="font-bold text-[20px]">TABLEAU DE BORD ET RAPPORT ANALYTIQUE</h1>
                     </div>
 
-                    <div className="flex space-x-2 w-[160px] items-center">
+                    <div className="mr-7 flex space-x-2 w-[160px] items-center">
+                    <button onClick={openRapport} className="relative">
+                        <FaHistory className="text-[20px]" />
+                     </button>
                     <button onClick={openNotificationModal} className="relative">
                         <IoIosNotifications className="text-[25px]" />
                         {/* Badge avec le nombre de notifications */}
@@ -285,6 +330,25 @@ export default function Menu () {
             <DataTable
               columns={columns}
               data={data}
+              />
+             
+            </div>
+          </div>
+        </div>
+      )}
+
+{isRapport && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-[60%] h-[50%] overflow-y-auto">
+           <div className="flex justify-between">
+           <div><h2 className="text-xl font-bold mb-4 text-center">Rapport</h2></div>
+          <div><button> <p className="text-red-600 font-bold text-[20px]  "  onClick={closeRapport}>X</p></button></div>
+           </div>
+           
+            <div className="flex justify-end mt-[-20px]">
+            <DataTable
+              columns={columnRapport}
+              data={dataRapport}
               />
              
             </div>

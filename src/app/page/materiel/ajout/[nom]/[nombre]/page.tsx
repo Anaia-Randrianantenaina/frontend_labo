@@ -2,17 +2,13 @@
 import { BiMessageAltError } from "react-icons/bi";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { AiOutlineUser } from "react-icons/ai";
-import Navbar from "@/app/navbar/navbar";
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { FaUserCircle } from "react-icons/fa";
 import { useParams } from "next/navigation";
 import Swal from "sweetalert2";
 import { TextField } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import'react-toastify/dist/ReactToastify.css';
-import context from "antd/es/app/context";
 
 export default function listeRessource() {
 
@@ -36,6 +32,11 @@ export default function listeRessource() {
 
   const {nom} = useParams();
 
+   // Etat pour stocker les valeurs du formulaire 
+   const [formValues1, setFormValues1] = useState({
+    message: 'Un nouveau matériels ajouté',
+  });
+
   // Definition de l'interface pour les données de l'historique
   interface HistoriqueData {
     id : number;
@@ -51,6 +52,13 @@ export default function listeRessource() {
   // Formes pour les historiques
   let isa = historique.nombre;
   let izy = isa - 1;
+
+  interface NotifData {
+    message: string ;
+  }
+
+  // États pour stocker les données, les états de chargement, et la visibilité des modaux
+  const [dataN, setDataN] = useState<NotifData[]>([]);
   
 
   
@@ -209,6 +217,44 @@ export default function listeRessource() {
     }
   };
 
+  const handleAddSubmit1 = async () => {
+    console.log("Données de notification envoyées :", formValues1);
+    try {
+        const response = await fetch('http://localhost:3001/notifs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formValues1),
+        });
+
+        const responseText = await response.text(); // Lire la réponse sous forme de texte brut pour inspection
+        console.log("Réponse brute:", responseText);
+
+        if (!response.ok) {
+            console.error('Erreur dans la requête de notification:', response.status, response.statusText);
+            throw new Error(`Erreur lors de l'ajout de la notification : ${response.statusText}`);
+        }
+
+        const result = JSON.parse(responseText);
+        console.log("Notification ajoutée avec succès:", result);
+        setDataN([...dataN, result]);
+
+        setFormValues1({
+            message: '',
+        });
+    } catch (error) {
+        console.error('Erreur capturée lors de l\'ajout de la notification:', error);
+    }
+};
+
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  await Promise.all([ajoutMateriel(e), handleAddSubmit1()]);
+};
+
+
+
   // Fonction pour gérer les changements dans les champs du formulaire
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -335,7 +381,7 @@ export default function listeRessource() {
               isClient && (
                 <div className="mt-5 border pt-4 mx-7 rounded shadow-xl h-[85%] overflow-auto">
 
-                  <form onSubmit={ajoutMateriel}>
+                  <form onSubmit={handleSubmit}>
                     <div className="mx-[25%]  pt-4  w-[50%] pb-4 p-3 ">
                       <div className="flex justify-center items-center pb-5">
                       <TextField className="mx-[5%] mt-[10%] mb-3 w-[80%] tet-[10px]" label="Identifiant du Materiel" value={numer} name="id" variant="outlined" />

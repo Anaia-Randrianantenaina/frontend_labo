@@ -68,7 +68,7 @@ export default function Menu () {
                   </button>
                 </div>
                     <div>
-                        <h1 className="font-bold text-[30px]">PATIENTS HOSPITALISER ET EXTERNE</h1>
+                        <h1 className="font-bold text-[20px]">PATIENTS HOSPITALISER ET EXTERNE</h1>
                     </div>
 
                     <div className="flex space-x-2 w-[160px] items-center">

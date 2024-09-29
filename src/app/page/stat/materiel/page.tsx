@@ -4,6 +4,10 @@ import Navbar from "@/app/navbar/navbar";
 import Menu from "../menu/page";
 import { FaArrowRight } from "react-icons/fa";
 import DataTable from "react-data-table-component";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { AiTwotoneDislike, AiFillLike } from "react-icons/ai";
 import { FcDislike } from "react-icons/fc";
 import { Bar, Pie, Scatter } from "react-chartjs-2";
@@ -20,7 +24,7 @@ export default function Materiel() {
     const [materielData, setMaterielData] = useState<MaterielData[]>([]);
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
-
+    const [loading, setLoading] = useState(false);
     const openTabM = () => settabM(true);
     const closeTabM = () => settabM(false);
     const openRapport = () => setRapport(true);
@@ -89,6 +93,16 @@ export default function Materiel() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // EXPORATATION DES DONNÉES EN EXCEL
+const exportToExcel = (data: any[], columns: any[], filename: string) => {
+    const worksheet = XLSX.utils.json_to_sheet(data, { header: columns.map(col => col.name) });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), filename);
+  };
+  
 
    
 
@@ -276,6 +290,62 @@ export default function Materiel() {
         };
     };
 
+    // Fonction pour capturer le contenu et générer le PDF
+  const saveAsPDF = async () => {
+    setLoading(true);
+    const input = document.getElementById('report-content') as HTMLElement | null; // Typage
+
+    // Vérification si l'élément est trouvé
+    if (!input) {
+        console.error('Element with ID "report-content" not found');
+        setLoading(false);
+        return; // Sortir de la fonction si l'élément n'est pas trouvé
+    }
+
+    try {
+        const canvas = await html2canvas(input, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+
+        const pdf = new jsPDF('portrait', 'pt', 'a4');
+        const imgWidth = 595.28;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+        // Générer un fichier blob
+        const pdfBlob = pdf.output('blob');
+
+        // Créer un URL pour le PDF blob
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Ouvrir le PDF dans un nouvel onglet
+        window.open(pdfUrl);
+
+          // Valeur par défaut pour le contenu
+    const defaultContenu = 'Rapport pour la gestion du matériels';
+
+        // Envoyer le PDF au backend
+        const formData = new FormData();
+        formData.append('file', pdfBlob, 'personnel_rapport.pdf');
+
+        formData.append('contenu', defaultContenu); // Ajouter la valeur du contenu ici
+
+        const response = await fetch('http://localhost:3001/upload-pdf', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.ok) {
+            console.log('PDF envoyé avec succès au backend');
+        } else {
+            console.error('Erreur lors de l\'envoi du PDF');
+        }
+    } catch (error) {
+        console.error('Erreur lors de la génération du PDF:', error);
+    }
+
+    setLoading(false);
+};
+
 
 
     return (
@@ -349,9 +419,10 @@ export default function Materiel() {
                                         paginationRowsPerPageOptions={[5]}
                                     />
                                     <div className="flex justify-end gap-4 mt-4">
-                                        <button className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800" onClick={() => window.print()}>
-                                            Imprimer
-                                        </button>
+                                        
+                                        <button className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800" onClick={() => exportToExcel(filteredData, columns, 'Liste des matériels externes.xlsx')}>
+                                            Exporter en Excel
+                                         </button>
                                         <button className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800" onClick={closeTabM}>
                                             Fermer
                                         </button>
@@ -457,76 +528,93 @@ export default function Materiel() {
             </div>
 
             {rapportM && (
-  <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg shadow-lg p-6 w-[210mm] h-[297mm] overflow-hidden print:w-[210mm] print:h-[297mm]">
+                <div  className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
+    <div id="report-content" className="bg-white rounded-lg shadow-md p-6 w-[210mm] h-[297mm] max-h-[100vh] overflow-auto print:w-[210mm] print:h-[297mm] print:overflow-visible">
+      
+      <div className="mb-6 text-center">
+        <h3 className="text-lg font-semibold">CHU TAMBOHOBE FIANARANTSOA</h3>
+        <h3 className="text-lg font-bold">SERVICE LABORATOIRE</h3>
 
-      <div className="mb-6">
-      <h3 className="text-lg font-semibold text-center">CHU TAMBOHOBE FIANARANTSOA</h3>
-      <h3 className="text-lg font-bold text-center">SERVICE LABORATOIRE</h3>
-      <h3 className="text-lg text-center mb-4">Rapport d'Activités de Laboratoire</h3>
-        <h3 className="text-center font-bold text-2xl mb-4 text-gray-900">Nombre de chaque matériel</h3>
-        <ul className="list-disc pl-5 space-y-2">
-          {Object.entries(materielCounts).map(([materiel, count]) => (
-            <li key={materiel} className="text-lg text-gray-800 flex justify-between items-center">
-              <span>{materiel} :</span>
-              <span className="font-semibold">{count}</span>
-            </li>
-          ))}
-        </ul>
+        <h3 className="text-md mt-3 mb-1">Rapport d'Activités de Laboratoire:</h3>
+        <h4 className="text-sm font-medium">{startDate && endDate ? `${startDate} au ${endDate}` : "Sélectionnez les dates"}</h4>
+
+        <h3 className="font-bold text-xl mt-4 mb-3">Gestion des patients</h3>
+        
+       <p className="text-[20px] text-center">Nombre de matériels : {filteredTotalMat}</p>
+
+       <table className="table-auto w-full text-center">
+  <thead>
+    <tr>
+      <th className="border px-4 py-2 text-[15px]">État</th>
+      <th className="border px-4 py-2 text-[15px]">Nombre de Matériels</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="border px-4 py-2 text-[12px]">Bonne état</td>
+      <td className="border px-4 py-2 text-[12px]">{filteredBonne}</td>
+    </tr>
+    <tr>
+      <td className="border px-4 py-2 text-[12px]">État moyen</td>
+      <td className="border px-4 py-2 text-[12px]">{filteredMoyen}</td>
+    </tr>
+    <tr>
+      <td className="border px-4 py-2 text-[12px]">Mauvais état</td>
+      <td className="border px-4 py-2 text-[12px]">{filteredMauvais}</td>
+    </tr>
+  </tbody>
+       </table>
+
+       <p className="text-[20px] mt-3 text-center">Prix total des matériels : {filteredTotalPrice} Ariary</p>
+       <table className="table-auto w-full text-center">
+  <thead>
+    <tr>
+      <th className="border px-4 py-2 text-[15px]">Prix (Ar)</th>
+      <th className="border px-4 py-2 text-[15px]">Matériels</th>
+    </tr>
+  </thead>
+  <tbody className="h-[150px] overflow-y-auto">
+    {Object.entries(prixByMat(filteredData)).map(([prix, materiels]) => (
+      <tr key={prix}>
+        <td className="border px-4 py-2 text-[15px] font-bold ">
+          <u>{prix} Ar</u>
+        </td>
+        <td className="border px-4 py-2 text-[13px]">
+          <ul className="list-disc text-left">
+            {materiels.map(materiel => (
+              <li key={materiel}>{materiel}</li>
+            ))}
+          </ul>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+              
       </div>
 
-      <div className="mb-6">
-        <h3 className="text-center font-bold text-2xl mb-4 text-gray-900">État des Matériels</h3>
-          <div className="flex space-x-[520px]">
-            <div><p>Matériels en bonne états :</p></div>
-            <div><p>{filteredBonne}</p></div>
-          </div>
-          <div className="flex space-x-[520px]">
-            <div><p>Matériels en états moyen :</p></div>
-            <div><p>{filteredMoyen}</p></div>
-          </div>
-          <div className="flex space-x-[510px]">
-            <div><p>Matériels en mauvais états :</p></div>
-            <div><p>{filteredMauvais}</p></div>
-          </div>
-      </div>
-
-      <div>
-        <h3 className="text-center font-bold text-2xl mb-4 text-gray-900">Prix des Matériels : {filteredTotalPrice.toFixed(2)}Ariary</h3>
-        <div className="flex flex-col space-y-4">
-          {Object.entries(prixByMat(filteredData)).map(([prix, materiels]) => (
-            <div key={prix} className="flex flex-col space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[15px]"><u>{prix} Ar:</u></span>
-                <div className="flex-grow"></div>
-              </div>
-              <p className="list-disc pl-5 space-y-1">
-                {materiels.map(materiel => (
-                  <li key={materiel} className="text-[15px]  text-right">{materiel}</li>
-                ))}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
+      {/* Section pour les boutons */}
       <div className="flex justify-end gap-4 mt-4 print:hidden">
-        <button
-          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
-          onClick={() => window.print()}
-        >
-          Imprimer
-        </button>
+      <button
+  className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300"
+  onClick={saveAsPDF}
+  disabled={loading}
+>
+  {loading ? 'En cours...' : 'Enregistrer en PDF'}
+</button>
 
-        <button
-          className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800"
-          onClick={closeRapport}
-        >
-          Fermer
-        </button>
+<button
+  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition duration-300"
+  onClick={closeRapport}
+>
+  Fermer
+</button>
+
       </div>
     </div>
   </div>
+
 )}
 
         </div>

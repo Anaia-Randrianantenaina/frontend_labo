@@ -47,6 +47,8 @@ export default function Personnel() {
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedPersonnel, setSelectedPersonnel] = useState<PersonnelData | null>(null);
+
+  
   const [searchTerm, setSearchTerm] = useState('');
 
   // Fonction pour récupérer les données des personnels depuis le serveur
@@ -233,6 +235,7 @@ export default function Personnel() {
       console.error("Erreur lors de l'ajout du personnel :", error);
     }
   };
+  
   // Ajout de notification
   const handleAddSubmit1 = async () => {
     console.log("Données de notification envoyées :", formValues1);

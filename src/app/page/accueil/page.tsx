@@ -26,7 +26,7 @@ export default function Accueil() {
   const [showTest, setShowTest] = useState(false);
   const pageTest = (id: number) => {
     setShowTest(!showTest);
-    window.location.href = "/page/patient/tests";
+    window.location.href = "/page/Suivi_Tests_Echantillons/Testes";
   };
 
   // SPIN PERSONNEL
@@ -54,8 +54,8 @@ export default function Accueil() {
             <img src="/Images/mainty_48.png" className="pl-3 pt-2 " />
           </div>
           <div>
-            <h2 className="text-[32px] pl-[6px] pt-2 font-bold text-white">
-              Laboratoire
+            <h2 className="text-[30px] pl-[6px] pt-2 font-bold text-white">
+              Lab E-Tech
             </h2>
           </div>
         </div>
@@ -75,14 +75,12 @@ export default function Accueil() {
 
           <div className="text-white p-2 bg-gray-600 rounded">
             <Tooltip title="Testes / Échantillons" placement="bottom" arrow>
-              <Link href="/page/patient/hospitalise">
-                <div className="flex space-x-1">
-                  <button>
+              <button onClick={() => pageTest(1)}>
+              <div className="flex space-x-1">
                     <GiTestTubes className="text-[15px]" />
-                  </button>
                   <p className="text-[15px] font-semibold">Testes</p>
-                </div>
-              </Link>
+                  </div>
+                </button>
             </Tooltip>
           </div>
 
@@ -218,6 +216,13 @@ export default function Accueil() {
 
       {/* MODAL */}
       {showPatient && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            {/* Spinner Animation */}
+            <div className="spinner border-t-4 border-blue-500 border-solid rounded-full w-16 h-16 animate-spin"></div>
+        </div>
+      )}
+
+      {showTest && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             {/* Spinner Animation */}
             <div className="spinner border-t-4 border-blue-500 border-solid rounded-full w-16 h-16 animate-spin"></div>

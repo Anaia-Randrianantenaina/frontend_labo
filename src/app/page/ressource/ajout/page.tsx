@@ -1,3 +1,17 @@
+import { useEffect, useState } from "react";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // N'oubliez pas d'importer le CSS
+import Tooltip from '@mui/material/Tooltip';
+import Image from 'next/image';
+import { TextField } from "@mui/material";
+import { BiMessageAltError } from "react-icons/bi";
+import { IoMdNotificationsOutline } from "react-icons/io";
+import { AiOutlineUser } from "react-icons/ai";
+import Navbar from "@/app/navbar/navbar";
+import DataTable from "react-data-table-component";
+
+
+
 export default function listeRessource() {
     // Composant de chargement personnalisé
     const [loading, setLoading] = useState(true);
@@ -43,6 +57,8 @@ export default function listeRessource() {
         ajoute: number;
 
         utilise : number;
+
+        action: string;
     }
 
 
@@ -165,20 +181,18 @@ export default function listeRessource() {
 
 
     // Toatify aseeho amin'ny notification
-    const aseho = () => toast.success('Nouveau Intrant ajouté!',
-        {
-            position: "top-center",
-            autoClose: 1000,
-            hideProgressBar: true,
-            // Temps avant la fermeture automatique (en millisecondes)
-        });
-    const asehoErreur = () => toast.error('Intrant non ajouté!',
-        {
-            position: "top-center",
-            autoClose: 4000,
-            hideProgressBar: true,
-            // Temps avant la fermeture automatique (en millisecondes)
-        });
+    const aseho = () => toast.success('Nouveau Intrant ajouté!', {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: true,
+      });
+      
+      const asehoErreur = () => toast.error('Intrant non ajouté!', {
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: true,
+      });
+      
 
 
     // Fonction d'ajout des nouveaux materiels : 
@@ -476,7 +490,7 @@ export default function listeRessource() {
             selector: (row: RessourceData) => row.id,
             sortable: true,
             width: "80px",
-            cell: row => (
+            cell: (row: RessourceData)=> (
                 <div>
                     {row.id} 
                 </div>
@@ -487,7 +501,7 @@ export default function listeRessource() {
             selector: (row: RessourceData) => row.presentation,
             sortable: true,
             width: "200px",
-            cell: row => (
+            cell: (row: RessourceData) => (
                 <div style={{ backgroundColor: '#f0f0f0', padding: '10px' }}>
                     {row.presentation}
                 </div>
@@ -498,7 +512,7 @@ export default function listeRessource() {
             selector: (row: RessourceData) => row.unite,
             sortable: true,
             width: "100px",
-            cell: row => (
+            cell: (row: RessourceData) => (
                 <div>
                     {row.unite} / {row.contenu}
                 </div>
@@ -509,7 +523,7 @@ export default function listeRessource() {
             selector: (row: RessourceData) => row.prix,
             sortable: true,
             width: "150px",
-            cell: row => (
+            cell: (row: RessourceData) => (
                 <div>
                     {row.prix} Ariary /{row.unite}
                 </div>
@@ -532,7 +546,7 @@ export default function listeRessource() {
             selector: (row: RessourceData) => row.quantite,
             sortable: true,
             width: "150px",
-            cell: row => (
+            cell:(row: RessourceData)=> (
                 <div>
 
                     • {row.quantite} {row.unite}(s) <br></br>
@@ -545,7 +559,7 @@ export default function listeRessource() {
             selector: (row: RessourceData) => row.quantite,
             sortable: true,
             width: "160px",
-            cell: row => (
+            cell:(row: RessourceData) => (
                 <div>
                     • {row.contenu * row.dosage_forme * row.quantite} {row.unite_dosage} <br></br>
                     • {row.contenu * row.dosage_forme * row.quantite * row.dosage} {row.unite_mesure}
@@ -557,7 +571,7 @@ export default function listeRessource() {
             selector: (row: RessourceData) => row.quantite,
             sortable: true,
             width: "180px",
-            cell: row => (
+            cell: (row: RessourceData) => (
                 <div>
                       • {row.contenu * row.dosage_forme * row.quantite * row.dosage - row.utilise} {row.unite_mesure}<br></br>
                       • {(row.contenu * row.dosage_forme * row.quantite * row.dosage - row.utilise)/(row.dosage_forme * row.quantite * row. dosage)} {row.unite} 
@@ -567,11 +581,11 @@ export default function listeRessource() {
         },
 
         {
-            name: "",
-            selector: row => row.action,
+            name: " ",
+            selector: (row: RessourceData) => row.action,
             sortable: true,
             width: "80px",
-            cell: row => (
+            cell: (row: RessourceData)=> (
                 <div>
                     <Tooltip title="Nouveau quantité" placement="right" arrow >
                         <button className="cursor-pointers opacity-0.5" >
@@ -589,23 +603,7 @@ export default function listeRessource() {
             )
         },
     ]
-    // const data = [
-    //     {
-    //         id: "Lipase flacon*60ml", unite: "Boite/100", date: "10/11/2025", num: "17042", quantite_p: "12 Boite ", quantite_t: "72000 ul", prix: "10000 Ariary ",
-    //         action: <Tooltip title="Nouveau quantité" placement="right" arrow >
-    //             <button className="cursor-pointers opacity-0.5" >
-    //                 <Image
-    //                     onClick={() => tog1(id)}
-    //                     src="/pic/add_list_24px.png"
-    //                     alt="Next.js Logo"
-    //                     width={22}
-    //                     height={30}
-    //                 />
-
-    //             </button>
-    //         </Tooltip>
-    //     }
-    // ]
+    
 
     const [isClient, setIsClient] = useState(false);
     useEffect(() => {
@@ -634,17 +632,17 @@ export default function listeRessource() {
     const [show1, setShow1] = useState(false);
 
 
-    const tog = async (id) => {
+    const tog = async (id: number) => {
         setShow(!show);
     }
 
-    const tog1 = async (id) => {
+    const tog1 = async (id: number) => {
         setShow1(!show1);
         const d = formValues.date_prescription;
         let n = formValues.numero_lot
     }
 
-    const fermeture = async (id) => {
+    const fermeture = async (id: number) => {
         setShow(!show);
         setFormValues({
 
@@ -677,7 +675,7 @@ export default function listeRessource() {
         });
     }
 
-    const fermeture1 = async (id) => {
+    const fermeture1 = async (id: number) => {
         setShow1(!show1);
         setPlus(0)
         setFormValues({
@@ -713,12 +711,12 @@ export default function listeRessource() {
 
     const [show5, setShow5] = useState(false);
 
-    const materielPage = async (id) => {
+    const materielPage = async (id: number) => {
         setShow5(!show5);
         window.location.href = '../materiel/liste'
     }
 
-    const historiquePage = async (id) => {
+    const historiquePage = async (id: number) => {
         setShow5(!show5);
         window.location.href = '../materiel/histo'
     }
@@ -1048,21 +1046,11 @@ export default function listeRessource() {
                     {/* Chargement avant l'affichage du page suivant */}
                     {show5 && (
                         <div id="modal" className="h-[100%] w-[100%] fixed top-0 left-0 flex bg-white bg-opacity-25 justify-center items-center backdrop-blur-sm">
-                            {/*  <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-opacity-75"></div>
-                            <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray-500"  fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="40" cy="40" r="38" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg> */}
-
-                            {/* <div className="flex justify-center items-center space-x-1">
-  <div className="w-1 h-6 bg-blue-500 animate-pulse"></div>
-  <div className="w-1 h-6 bg-blue-500 animate-pulse animation-delay-200"></div>
-  <div className="w-1 h-6 bg-blue-500 animate-pulse animation-delay-400"></div>
-</div> */}
-                            <div class="flex justify-center items-center">
-                                <div class="w-4 h-4 bg-green-500 rounded-full animate-ping"></div>
-                                <div class="w-4 h-4 bg-blue-500 rounded-full mx-8 animate-ping animation-delay-200"></div>
-                                <div class="w-4 h-4 bg-red-500 rounded-full animate-ping animation-delay-400"></div>
+                           
+                            <div className="flex justify-center items-center">
+                                <div className="w-4 h-4 bg-green-500 rounded-full animate-ping"></div>
+                                <div className="w-4 h-4 bg-blue-500 rounded-full mx-8 animate-ping animation-delay-200"></div>
+                                <div className="w-4 h-4 bg-red-500 rounded-full animate-ping animation-delay-400"></div>
                             </div>
                         </div>
 

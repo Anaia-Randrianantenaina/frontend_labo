@@ -604,7 +604,7 @@ export default function listeRessource() {
         });
     }
 
-    const fermeture1 = async (id) => {
+    const fermeture1 = async (id: number) => {
         setShow1(!show1);
         setFormValues({
             presentation: "",
@@ -962,10 +962,10 @@ export default function listeRessource() {
   <div className="w-1 h-6 bg-blue-500 animate-pulse animation-delay-200"></div>
   <div className="w-1 h-6 bg-blue-500 animate-pulse animation-delay-400"></div>
 </div> */}
-                            <div class="flex justify-center items-center">
-                                <div class="w-4 h-4 bg-green-500 rounded-full animate-ping"></div>
-                                <div class="w-4 h-4 bg-blue-500 rounded-full mx-8 animate-ping animation-delay-200"></div>
-                                <div class="w-4 h-4 bg-red-500 rounded-full animate-ping animation-delay-400"></div>
+                            <div className="flex justify-center items-center">
+                                <div className="w-4 h-4 bg-green-500 rounded-full animate-ping"></div>
+                                <div className="w-4 h-4 bg-blue-500 rounded-full mx-8 animate-ping animation-delay-200"></div>
+                                <div className="w-4 h-4 bg-red-500 rounded-full animate-ping animation-delay-400"></div>
                             </div>
                         </div>
 

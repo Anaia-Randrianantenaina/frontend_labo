@@ -30,7 +30,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Swal from 'sweetalert2';
 import * as XLSX from "xlsx";
-import Mmenu from "./menu/page";
+import Menuu from "../menu/page";
 
 const DataTable = dynamic(() => import("react-data-table-component"), {
   ssr: false,
@@ -552,7 +552,7 @@ const selecta = () => {
         <div className="w-full h-[100vh] p-2">
           {/* MENU AMBONY EO INY */}
           <div>
-          <Mmenu />
+          <Menuu />
         </div>
           <div className="w-full h-[2%]"></div> {/*Tsa kitiana*/}
           <div className="w-full h-[91%] shadow-md bg-white rounded">

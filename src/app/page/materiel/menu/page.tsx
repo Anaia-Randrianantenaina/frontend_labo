@@ -21,7 +21,7 @@ export default function Menu () {
                     </div>
               
                     <div>
-                        <h1 className="font-bold text-[30px]">LISTE DES MATÉRIELS ET DES RESSOURCES</h1>
+                        <h1 className="font-bold text-[20px]">LISTE DES MATÉRIELS ET DES RESSOURCES</h1>
                     </div>
 
                     <div className="flex space-x-2 w-[160px] items-center">

@@ -25,6 +25,9 @@ export default function Resource() {
     const [tabPrix, setTabPrix] = useState(false);
     const openPrix = () => setTabPrix(true);
     const closePrix = () => setTabPrix(false);
+    const [rapport, setRapport] = useState(false);
+    const openRap = () => setRapport(true);
+    const closeRap = () => setRapport(false);
 
     interface IntrantData {
         id: string;
@@ -338,7 +341,7 @@ const barChartData = generateBarChartData(prixParIntrantData);
          {/* Espacement pour l'alignement */}
          <div className="mr-5">
     <button className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 
-    transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" >
+    transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" onClick={openRap}>
         Rapport Analytiques
     </button>
 </div>
@@ -516,6 +519,97 @@ const barChartData = generateBarChartData(prixParIntrantData);
                     <Bar data={chartData()} options={chartOptions} />
                     </div>
                 </div>
+
+                {rapport && (
+                <div  className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
+    <div id="report-content" className="bg-white rounded-lg shadow-md p-6 w-[210mm] h-[297mm] max-h-[100vh] overflow-auto print:w-[210mm] print:h-[297mm] print:overflow-visible">
+      
+      <div className="mb-6 text-center">
+        <h3 className="text-lg font-semibold">CHU TAMBOHOBE FIANARANTSOA</h3>
+        <h3 className="text-lg font-bold">SERVICE LABORATOIRE</h3>
+
+        <h3 className="text-md mt-3 mb-1">Rapport d'Activités de Laboratoire:</h3>
+        <h4 className="text-sm font-medium">{startDate && endDate ? `${startDate} au ${endDate}` : " "}</h4>
+
+        <h3 className="font-bold text-xl mt-4 mb-3">Gestion des patients</h3>
+        
+       <p className="text-[20px] text-center">Nombre de matériels : {}</p>
+
+       <h3 className="text-center font-bold text-2xl mb-4 text-gray-900">Nombre de chaque Intrant</h3>
+<div className="overflow-y-auto max-h-[180px]">
+<div className="overflow-x-hidden">
+  <table className="min-w-full bg-white border border-gray-300 w-full">
+    <thead>
+      <tr className="bg-gray-200">
+        <th className="border border-gray-300 px-4 py-2 text-left">Intrant</th>
+        <th className="border border-gray-300 px-4 py-2 text-right">Nombre</th>
+      </tr>
+    </thead>
+    <tbody>
+      {Object.entries(intrantCounts).map(([materiel, count]) => (
+        <tr key={materiel} className="hover:bg-gray-100">
+          <td className="border border-gray-300 px-4 py-2">{materiel}</td>
+          <td className="border border-gray-300 px-4 py-2 text-right font-semibold">{count}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+       <p className="text-[20px] mt-3 text-center">Prix total des matériels : {filteredTotalPrice} Ariary</p>
+       <table className="table-auto w-full text-center">
+  <thead>
+    <tr>
+      <th className="border px-4 py-2 text-[15px]">Prix (Ar)</th>
+      <th className="border px-4 py-2 text-[15px]">Matériels</th>
+    </tr>
+  </thead>
+  <tbody className="h-[150px] overflow-y-auto">
+  <div className="w-[570px] h-[270px] mr-2 bg-gradient-to-r from-gray-300 via-gray-50 to-white rounded-3xl shadow-xl p-6 border border-gray-300">
+                      <h3 className="text-center font-bold text-2xl mb-4 text-gray-700">Prix par matériel</h3>
+                      <div className="flex flex-wrap justify-center space-x-4 h-[150px] overflow-y-auto"> {/* Limite la hauteur et active le scroll */}
+                          {Object.entries(prixByInt(filteredData)).map(([prix, intrant]) => (
+                              <div key={prix} className="text-center bg-white p-2 rounded-lg shadow-lg mb-2">
+                                  <h4 className="font-bold text-[15px] text-gray-700"><u>{prix} Ar</u></h4>
+                                  <ul className="mt-1 text-[13px] text-gray-600 font-bold">
+                                      {intrant.map(intrant => (
+                                          <li key={intrant}>{intrant}</li>
+                                      ))}
+                                  </ul>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+  </tbody>
+</table>
+
+              
+      </div>
+
+      {/* Section pour les boutons */}
+      <div className="flex justify-end gap-4 mt-4 print:hidden">
+      {/* <button
+  className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300"
+  onClick={saveAsPDF}
+  disabled={loading}
+>
+  {loading ? 'En cours...' : 'Enregistrer en PDF'}
+</button> */}
+
+<button
+  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition duration-300"
+  onClick={closeRap}
+>
+  Fermer
+</button>
+
+      </div>
+    </div>
+  </div>
+
+)}
 
 
                      

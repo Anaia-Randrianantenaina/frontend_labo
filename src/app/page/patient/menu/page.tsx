@@ -11,19 +11,19 @@ export default function Menu () {
   const [showPatient, setShowPatient] = useState(false);
   const statPatient = (id: number) => {
     setShowPatient(!showPatient);
-    window.location.href = "/page/stat/patient/";
+    window.location.href = "/page/patient/hospitalise";
   };
 
   const [showTest, setShowTest] = useState(false);
   const statTest = (id: number) => {
     setShowTest(!showTest);
-    window.location.href = "/page/stat/tests/";
+    window.location.href = "/page/patient/analyse";
   };
 
   const [showMat, setShowMat] = useState(false);
   const statMat = (id: number) => {
     setShowMat(!showTest);
-    window.location.href = "/page/stat/materiel/";
+    window.location.href = "/page/patient/medecin";
   };
 
   const [showPerso, setShowPerso] = useState(false);
@@ -68,7 +68,7 @@ export default function Menu () {
                   </button>
                 </div>
                     <div>
-                        <h1 className="font-bold text-[30px]">PATIENTS HOSPITALISER ET EXTERNE</h1>
+                        <h1 className="font-bold text-[20px]">PATIENTS HOSPITALISER ET EXTERNE</h1>
                     </div>
 
                     <div className="flex space-x-2 w-[160px] items-center">

@@ -25,7 +25,7 @@ import { Input, Select, Skeleton } from 'antd';
 import Navbar from "@/app/navbar/navbar";
 import Search from "antd/es/transfer/search";
 import * as XLSX from "xlsx";
-import Mmenu from "./menu/page";
+import Menuu from "../menu/page";
 // import { Select, Input } from "antd";
 // import Navbar from "@/app/navbar/navbar";
 
@@ -571,7 +571,7 @@ const selecta = () => {
           
           {/* MENU AMBONY EO INY */}
           <div>
-          <Mmenu />
+          <Menuu />
         </div>
          
           <div className="w-full h-[2%]"></div> {/*Tsa kitiana*/}

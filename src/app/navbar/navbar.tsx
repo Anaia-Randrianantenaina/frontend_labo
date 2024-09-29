@@ -32,6 +32,14 @@ export default function navbar() {
     window.location.href = "/page/materiel/liste";
   };
 
+  // SPIN TESTS
+  const [showTest, setShowTest] = useState(false);
+  const pageTest = (id: number) => {
+    setShowTest(!showTest);
+    window.location.href = "/page/Suivi_Tests_Echantillons/Testes";
+  };
+
+
    // SPIN PERSONNEL
    const [showPerso, setShowPerso] = useState(false);
    const pagePerso = (id: number) => {
@@ -51,7 +59,7 @@ export default function navbar() {
       <button onClick={() => pageAccueil(1)}>
         <img src="/Images/laboratoryy_32.png" className="pl-5 pt-4" />
         <p className="text-[12px] pl-[6px] pt-2 font-bold text-green-900">
-          Laboratoire
+          Lab E-Tech
         </p>
         </button>
         <hr className="w-14 ml-[10px] mt-2" />
@@ -67,12 +75,10 @@ export default function navbar() {
 
         <div className="text-center mt-6">
           <Tooltip title="Testes / Echantillons" placement="right" arrow>
-            <Link href="/page/Suivi_Tests_Echantillons/Accueill_Testes">
-              <button>
+          <button onClick={() => pageTest(1)}>
                 <GiTestTubes className="text-[25px]" />
-              </button>
               <p className="text-[10px] font-semibold">Test</p>
-            </Link>
+            </button>
           </Tooltip>
         </div>
 
@@ -131,6 +137,13 @@ export default function navbar() {
       )}
 
       {showPatient && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            {/* Spinner Animation */}
+            <div className="spinner border-t-4 border-blue-500 border-solid rounded-full w-16 h-16 animate-spin"></div>
+        </div>
+      )}
+
+      {showTest && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             {/* Spinner Animation */}
             <div className="spinner border-t-4 border-blue-500 border-solid rounded-full w-16 h-16 animate-spin"></div>
