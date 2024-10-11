@@ -364,7 +364,7 @@ const ScatterOption = {
   <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg shadow-lg p-6 w-[70%] h-[60%] overflow-auto">
       <h2 className="text-2xl text-center font-bold mb-4">
-        Détails sur le nombre de paramètre enregistré : {startDate && endDate ? `${startDate} au ${endDate}` : ""}
+        Détails sur le nombre de echantillon enregistré : {startDate && endDate ? `${startDate} au ${endDate}` : ""}
       </h2>
       
       {/* Tableau des paramètres */}

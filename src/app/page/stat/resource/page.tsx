@@ -380,7 +380,7 @@ const barChartData = generateBarChartData(prixParIntrantData);
 {tabI && (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-[80%] h-[60%] overflow-auto">
-            <h2 className="text-2xl text-center font-bold mb-4">Détails des Matériels</h2>
+            <h2 className="text-2xl text-center font-bold mb-4">Détails des intrants</h2>
             <DataTable
                 columns={columns}
                 data={filteredData}
@@ -389,9 +389,7 @@ const barChartData = generateBarChartData(prixParIntrantData);
                 paginationRowsPerPageOptions={[5]}
             />
             <div className="flex justify-end gap-4 mt-4">
-                <button className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800" onClick={() => window.print()}>
-                    Imprimer
-                </button>
+                
                 <button className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800" onClick={() => exportToExcel(filteredData, columns, 'details_intrants.xlsx')}>
                     Exporter en Excel
                 </button>
@@ -460,9 +458,7 @@ const barChartData = generateBarChartData(prixParIntrantData);
                 paginationRowsPerPageOptions={[5]}
             />
             <div className="flex justify-end gap-4 mt-4">
-                <button className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800" onClick={() => window.print()}>
-                    Imprimer
-                </button>
+                
                 <button className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800" onClick={() => exportToExcel(prixData, prixColumns, 'prix_intrants.xlsx')}>
                     Exporter en Excel
                 </button>
