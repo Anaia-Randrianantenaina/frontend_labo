@@ -72,7 +72,7 @@ export default function Menu () {
                     </div>
 
                     <div className="flex space-x-2 w-[160px] items-center">
-                      <IoIosNotifications className="text-[25px]" />
+                      {/* <IoIosNotifications className="text-[25px]" /> */}
                       <div className="flex items-center space-x-1 bg-gray-200 rounded-md px-2 py-1">
                       <AiOutlineUser className="text-[25px]" />
                       <span className="text-gray-700 font-semibold text-[14px]">Utilisateur</span>
