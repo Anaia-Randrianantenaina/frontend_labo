@@ -4,6 +4,7 @@ import { AiOutlineUser } from "react-icons/ai";
 import React, { useEffect, useState } from "react";
 import { FaBox, FaFlask, FaHistory, FaTrash, FaUser } from "react-icons/fa";
 import DataTable from "react-data-table-component";
+import { Tooltip } from "chart.js";
 
 
 
@@ -207,7 +208,7 @@ export default function Menu () {
                   <button onClick={() => statPerso(1)}>
                      <div className="flex items-center space-x-2 bg-gray-200 p-2 rounded-md">
                       <FaUser className="text-lg" />
-                      <h1><u>Personnels</u></h1>
+                      <h1><u>Personnel</u></h1>
                      </div>
                   </button>
                 </div>

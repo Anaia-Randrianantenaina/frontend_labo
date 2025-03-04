@@ -256,19 +256,82 @@ export default function Perso() {
           {/* MODAL POUR LE RAPPORT ANALYTIQUE */}
           {isReportOpen && (
  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
- <div className="bg-white p-8 rounded-lg shadow-lg z-50" id="report-content">
-   <h2 className="text-xl font-bold mb-4">Rapport Analytique</h2>
-   <Bar data={barData} options={{ responsive: true }} />
-   <Pie data={pieData} options={{ responsive: true }} />
-   <div className="flex justify-between">
+ <div className="bg-white w-[500px] h-[900px] rounded-lg shadow-lg z-50 p-6" id="report-content">
+   <h2 className="text-xl font-bold mb-1 text-center">CHU Tambohobe Fianarantsoa</h2>
+   <h3 className="text-lg font-semibold mb-2 text-center">Service Laboratoire</h3>
+   
+   {/* Date et Heure */}
+   <p className="text-center text-sm mb-4 text-gray-600">
+     Rapport généré le : {new Date().toLocaleDateString()} à {new Date().toLocaleTimeString()}
+   </p>
+
+   {/* Introduction */}
+   <p className="text-md mb-4 text-justify text-gray-700">
+     Ce rapport présente une vue d'ensemble de la répartition des personnels au sein du laboratoire du CHU Tambohobe.
+     Il vise à faciliter la gestion et l'optimisation des ressources humaines en fournissant des données claires et actualisées.
+   </p>
+
+   {/* Titre principal */}
+   <p className="text-lg font-semibold mb-4 text-center">Nombre total de personnel : {totalPersonnel}</p>
+   
+   {/* Tableau des fonctions */}
+   <table className="min-w-full border-collapse border border-gray-400 mb-5">
+     <thead>
+       <tr>
+         <th className="border border-gray-300 px-3 py-1 text-left text-sm font-semibold">Fonction</th>
+         <th className="border border-gray-300 px-3 py-1 text-left text-sm font-semibold">Nombre</th>
+       </tr>
+     </thead>
+     <tbody>
+       <tr>
+         <td className="border border-gray-300 px-3 py-1 text-sm">Chef de Service</td>
+         <td className="border border-gray-300 px-3 py-1 text-sm">{chefService}</td>
+       </tr>
+       <tr>
+         <td className="border border-gray-300 px-3 py-1 text-sm">Médecin Biologiste</td>
+         <td className="border border-gray-300 px-3 py-1 text-sm">{biologiste}</td>
+       </tr>
+       <tr>
+         <td className="border border-gray-300 px-3 py-1 text-sm">Technicien de Laboratoire</td>
+         <td className="border border-gray-300 px-3 py-1 text-sm">{techniciens}</td>
+       </tr>
+       <tr>
+         <td className="border border-gray-300 px-3 py-1 text-sm">Secrétaire</td>
+         <td className="border border-gray-300 px-3 py-1 text-sm">{secretaire}</td>
+       </tr>
+     </tbody>
+   </table>
+   
+   {/* Statistiques supplémentaires */}
+   <p className="text-md font-semibold mb-2 text-gray-700">Statistiques supplémentaires :</p>
+   <ul className="list-disc list-inside mb-4 text-gray-600">
+     <li>Chefs de service : {((chefService / totalPersonnel) * 100).toFixed(1)}%</li>
+     <li>Médecins biologistes : {((biologiste / totalPersonnel) * 100).toFixed(1)}%</li>
+     <li>Techniciens de laboratoire : {((techniciens / totalPersonnel) * 100).toFixed(1)}%</li>
+     <li>Secrétaires : {((secretaire / totalPersonnel) * 100).toFixed(1)}%</li>
+   </ul>
+
+   {/* Remarques */}
+   <p className="text-sm mb-4 text-gray-700">Remarques : Ce rapport est conçu pour fournir une analyse précise de la composition du personnel, en vue d’optimiser les ressources humaines du laboratoire.</p>
+   
+   {/* Conclusion */}
+   <p className="text-md mt-6 mb-4 text-justify text-gray-700">
+     La répartition actuelle des rôles et fonctions assure un fonctionnement optimal du laboratoire. Des ajustements périodiques seront faits en fonction des besoins opérationnels et des évolutions au sein du laboratoire.
+   </p>
+   
+   {/* Pied de page */}
+   <p className="text-xs text-center text-gray-500 mt-5">© 2024 CHU Tambohobe Fianarantsoa. Tous droits réservés.</p>
+   
+   {/* Boutons */}
+   <div className="flex justify-between mt-6">
      <button
-       className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg"
+       className="px-4 py-2 bg-red-600 text-white rounded-lg"
        onClick={closeReportModal}
      >
        Fermer
      </button>
      <button
-       className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+       className="px-4 py-2 bg-blue-600 text-white rounded-lg"
        onClick={saveAsPDF}
        disabled={loading}
      >
@@ -277,6 +340,8 @@ export default function Perso() {
    </div>
  </div>
 </div>
+
+
 )}
         </div>
       </div>

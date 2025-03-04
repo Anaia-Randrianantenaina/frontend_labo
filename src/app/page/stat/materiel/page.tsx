@@ -484,7 +484,7 @@ const exportToExcel = (data: any[], columns: any[], filename: string) => {
                           {Object.entries(materielCounts).map(([materiel, count]) => (
                          <li key={materiel} className="text-lg text-gray-800 flex justify-between items-center">
                         <span>{materiel} :</span>
-                          <span className="font-semibold">{count}</span>
+                          <span className="font-semibold mr-6">{count}</span>
                      </li>
                    ))}
                     </ul>

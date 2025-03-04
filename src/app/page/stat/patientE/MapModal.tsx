@@ -97,58 +97,61 @@ const MapModal: React.FC<MapModalProps> = ({ show, onClose, data }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] h-[90%] overflow-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Carte des Patients</h2>
-          <button
-            className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800"
-            onClick={onClose}
-          >
-            Fermer
-          </button>
-        </div>
-
-        {loading && (
-          <div className="mb-4 text-blue-600">
-            Chargement de la carte...
-          </div>
-        )}
-        
-        {error && (
-          <div className="mb-4 text-red-600">
-            {error}
-          </div>
-        )}
-
-        <div className="mb-4 text-sm text-gray-600">
-          <div>Adresses reçues: {data?.length || 0}</div>
-          <div>Marqueurs placés: {markers.length}</div>
-          {/* <div>Quartiers trouvés: {markers.map(m => m.address).join(', ')}</div> */}
-        </div>
-
-        <MapContainer
-          center={[-21.4419, 47.0857]} // Centre de Fianarantsoa
-          zoom={14}
-          style={{ height: "calc(100% - 200px)", width: "100%" }}
+    <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] h-[90%] overflow-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-3xl font-bold text-gray-800 text-center border-b-2 border-gray-300 pb-2 flex-1">
+        Géolocalisation pour la sensibilisation des patients dans les zones à forte concentration.
+        </h2>
+        <button
+          className="px-4 py-2  text-red-700 text-[30px] rounded ml-4"
+          onClick={onClose}
         >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          {markers.map((marker, index) => (
-            <Marker 
-              key={`${marker.lat}-${marker.lon}-${index}`}
-              position={[marker.lat, marker.lon]}
-              icon={customIcon}
-            >
-              <Popup>
-                {marker.address}
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+          X
+        </button>
       </div>
+  
+      {loading && (
+        <div className="mb-4 text-blue-600">
+          Chargement de la carte...
+        </div>
+      )}
+  
+      {error && (
+        <div className="mb-4 text-red-600">
+          {error}
+        </div>
+      )}
+  
+      <div className="mb-4 text-sm text-gray-600">
+        <div>Adresses reçues: {data?.length || 0}</div>
+        <div>Marqueurs placés: {markers.length}</div>
+      </div>
+  
+      <MapContainer
+        center={[-21.4419, 47.0857]} // Centre de Fianarantsoa
+        zoom={14}
+        style={{ height: "calc(100% - 200px)", width: "100%" }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {markers.map((marker, index) => (
+          <Marker 
+            key={`${marker.lat}-${marker.lon}-${index}`}
+            position={[marker.lat, marker.lon]}
+            icon={customIcon}
+          >
+            <Popup>
+              {marker.address}
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </div>
+  </div>
+  
+  
   );
 };
 
